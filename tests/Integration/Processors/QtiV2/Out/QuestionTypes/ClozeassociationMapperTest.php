@@ -49,8 +49,7 @@ class ClozeassociationMapperTest extends AbstractQuestionTypeTest
 
             // And its response processing and response declaration
             $responseProcessing =  $assessmentItem->getResponseProcessing();
-            print_r($responseProcessing);
-
+            
             /** @var ResponseDeclaration $responseDeclaration */
             $responseDeclaration = $assessmentItem->getResponseDeclarations()->getArrayCopy()[0];
             $this->assertEquals(Cardinality::MULTIPLE, $responseDeclaration->getCardinality());
