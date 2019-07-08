@@ -2,33 +2,56 @@
 
 namespace LearnosityQti\Tests\Integration\Processors\QtiV2\Out\QuestionTypes;
 
+use LearnosityQti\Entities\QuestionTypes\imageclozeassociation;
+use LearnosityQti\Entities\QuestionTypes\imageclozeassociation_image;
+use LearnosityQti\Entities\QuestionTypes\imageclozeassociation_response_container;
 use LearnosityQti\Processors\QtiV2\Out\Constants;
+use LearnosityQti\Processors\QtiV2\Out\QuestionTypes\ImageclozeassociationMapper;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\common\datatypes\QtiDirectedPair;
 use qtism\common\enums\BaseType;
 use qtism\common\enums\Cardinality;
-use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\GapImg;
 use qtism\data\content\interactions\GraphicGapMatchInteraction;
 use qtism\data\state\ResponseDeclaration;
+use LearnosityQti\Services\ConvertToQtiService;
 use qtism\data\state\Value;
+use ReflectionProperty;
 
-class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
+class ImageclozeassociationMapperTest extends \PHPUnit_Framework_TestCase
 {
+    
     public function testSimpleCommonCase()
     {
-        /** @var AssessmentItem $assessmentItem */
-        $question = json_decode($this->getFixtureFileContents('learnosityjsons/data_imageclozeassociation.json'), true);
-        $assessmentItem = $this->convertToAssessmentItem($question);
+        $question = $this->buildSimpleImageClozeassociationQuestion();
+        $imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
+        $mock = $this->getMock('ConvertToQtiService', array('getInputPath'));
+        
+        // Replace protected self reference with mock object
+        
+		$ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+		$ref->setAccessible(true);
+		$ref->setValue(null, $mock);
+        
+        $path = $mock->expects($this->once())
+            ->method('getInputPath')
+            ->will($this->returnValue($imagePath));
+        
 
+        /** @var graphicGapMatchInteraction $interaction */
+        $mapper = new ImageclozeassociationMapper();
+        //$mapper->attach($mock);
+        list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert($question, 'testIdentifier', 'testIdentifier');
+        
         /** @var GraphicGapMatchInteraction $interaction */
         $interaction = $assessmentItem->getComponentsByClassName('graphicGapMatchInteraction', true)->getArrayCopy()[0];
         $this->assertTrue($interaction instanceof GraphicGapMatchInteraction);
 
         // And its prompt is mapped correctly
         $promptString = QtiMarshallerUtil::marshallCollection($interaction->getPrompt()->getComponents());
-        $this->assertEquals('<p>[This is the stem.]</p>', $promptString);
+        $this->assertEquals('Imagecloze association question', $promptString);
 
+       
         // And its gapimages mapped well
         /** @var GapImg[] $gapImages */
         $gapImages = $interaction->getGapImgs()->getArrayCopy();
@@ -77,5 +100,26 @@ class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
     {
         $this->assertEquals($expectedFirstValue, $pair->getFirst());
         $this->assertEquals($expectedSecondValue, $pair->getSecond());
+    }
+    
+    private function buildSimpleImageClozeassociationQuestion()
+    {
+        $imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
+        $imageObj = new imageclozeassociation_image;
+        $imageObj->set_src($imagePath);
+        $response_positions = [
+            ['x' => "0.14", 'y' => "48"], 
+            ['x' => "35.1", 'y' => "73.57"], 
+            ['x' => "-2.97", 'y' => "20.24"], 
+            ['x' => "42.65", 'y' => "40.48"]
+        ];
+        $possible_responses = ["Choice A", "Choice B", "Choice C", "Choice D"];
+        $response_container = new imageclozeassociation_response_container;
+        $response_container->set_pointer('left');
+        $response_container->set_vertical_top(true);
+        $question = new imageclozeassociation('imageclozeassociation', $imageObj, $response_positions, $possible_responses);
+        $question->set_stimulus('Imagecloze association question');
+        $question->set_response_container($response_container);
+        return $question;
     }
 }
