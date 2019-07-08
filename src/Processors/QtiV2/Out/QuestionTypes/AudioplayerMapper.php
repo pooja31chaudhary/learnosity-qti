@@ -23,7 +23,7 @@ class AudioplayerMapper extends AbstractQuestionTypeMapper
         $interaction->setAutostart(true);
         $interaction->setMinPlays(1);
         $interaction->setMaxPlays(1);
-        $interaction->setLabel();
+        $interaction->setLabel($interactionLabel);
 
         // Set loop
         $interaction->setLoop(true);
