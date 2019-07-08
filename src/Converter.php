@@ -10,16 +10,17 @@ use LearnosityQti\Exceptions\MappingException;
 use LearnosityQti\Processors\IMSCP\In\ManifestMapper;
 use LearnosityQti\Processors\IMSCP\Out\ManifestWriter;
 use LearnosityQti\Processors\Learnosity\In\ItemMapper;
+use LearnosityQti\Processors\Learnosity\In\FeatureMapper;
 use LearnosityQti\Processors\Learnosity\In\QuestionMapper;
 use LearnosityQti\Processors\QtiV2\In\TestMapper;
 use LearnosityQti\Processors\QtiV2\In\SharedPassageMapper;
 use LearnosityQti\Processors\QtiV2\Out\ItemWriter;
+use LearnosityQti\Processors\QtiV2\Out\FeatureWriter;
 use LearnosityQti\Processors\QtiV2\Out\QuestionWriter;
 use LearnosityQti\Services\LearnosityToQtiPreProcessingService;
 use LearnosityQti\Services\LogService;
 use LearnosityQti\Utils\FileSystemUtil;
 use LearnosityQti\Utils\StringUtil;
-use LearnosityQti\Utils\SimpleHtmlDom\SimpleHtmlDom;
 use qtism\data\storage\xml\XmlDocument;
 use qtism\data\storage\xml\XmlStorageException;
 use Symfony\Component\Finder\Finder;
@@ -33,6 +34,7 @@ class Converter
     const LEARNOSITY_DATA_ITEM = 'item';
     const LEARNOSITY_DATA_QUESTION = 'question';
     const LEARNOSITY_DATA_QUESTION_DATA = 'questiondata';
+    const LEARNOSITY_DATA_FEATURE = 'feature';
 
     public static function convertImscpDirectoryToLearnosityDirectory($imscpDirectory, $learnosityDirectory, $baseAssetsUrl = '', $validate = true)
     {
@@ -261,10 +263,13 @@ class Converter
     public static function convertLearnosityToQtiItem(array $data)
     {
         $jsonType = self::guessLearnosityJsonDataType($data);
-        //echo $jsonType; die;
+        
         // Handle `item` which contains both a single item and one or more questions/features
         if ($jsonType === self::LEARNOSITY_DATA_ITEM) {
             list($xmlString, $messages, $featureHtml) = self::convertLearnosityItem($data);
+        // Handle if feature
+        } elseif ($jsonType === self::LEARNOSITY_DATA_FEATURE) {
+            list($xmlString, $messages, $featureHtml) = self::convertLearnosityFeature($data);
         // Handle if just question
         } elseif ($jsonType === self::LEARNOSITY_DATA_QUESTION) {
             list($xmlString, $messages, $featureHtml) = self::convertLearnosityQuestion($data);
@@ -286,10 +291,24 @@ class Converter
         return [$xmlString, $messages, $featureHtml];
     }
 
-    private static function convertLearnosityQuestion(array $questionJson)
+    private static function convertLearnosityFeature(array $featureJson)
     {
         
-        $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson['feature']);
+        $preprocessingService = new LearnosityToQtiPreProcessingService($featureJson);
+        $featureMapper = new FeatureMapper();
+        $featureWriter = new FeatureWriter();
+        
+        $feature = $featureMapper->parse($preprocessingService->processJson($featureJson));
+        return $featureWriter->convert($feature);
+    }
+
+    private static function convertLearnosityQuestion(array $questionJson)
+    {
+        if (isset($questionJson['feature'])) {
+            $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson['feature']);
+        } else {
+            $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson);
+        }
         $questionMapper = new QuestionMapper();
         $questionWriter = new QuestionWriter();
         
@@ -327,7 +346,7 @@ class Converter
         $questions = [];
         foreach ($questionsJson as $question) {
             
-            if (!in_array($question['data']['type'],['audioplayer','videoplayer','sharedpassage'])) {
+            if (!in_array($question['data']['type'], ['audioplayer', 'videoplayer', 'sharedpassage'])) {
                 $questions[] = $questionMapper->parse($question);
             }
         }
@@ -341,6 +360,14 @@ class Converter
     {
         if ($data == null) {
             throw new MappingException('Invalid JSON');
+        }
+
+        // Guess this JSON is a 'feature'
+        if (isset($data['data']['type']) && in_array($data['data']['type'], ['audioplayer','videoplayer'])) {
+            if (!isset($data['reference'])) {
+                throw new MappingException('Invalid `item` JSON. Key `reference` shall not be empty');
+            }
+            return self::LEARNOSITY_DATA_FEATURE;
         }
 
         // Guess this JSON is an `item`

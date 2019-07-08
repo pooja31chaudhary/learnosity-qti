@@ -4,7 +4,6 @@ namespace LearnosityQti\Services;
 
 use LearnosityQti\Exceptions\MappingException;
 use LearnosityQti\Processors\QtiV2\Out\Constants;
-use LearnosityQti\Processors\QtiV2\Out\ContentCollectionBuilder;
 use LearnosityQti\Utils\MimeUtil;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use LearnosityQti\Utils\SimpleHtmlDom\SimpleHtmlDom;
@@ -66,23 +65,22 @@ class LearnosityToQtiPreProcessingService
         if (isset($node->attr['data-type']) && isset($node->attr['data-src'])) {
             $src = trim($node->attr['data-src']);
             $type = trim($node->attr['data-type']);
-            if ($type === 'audioplayer' || $type === 'audioplayer') {
+            if ($type === 'audioplayer' || $type === 'videoplayer') {
                 return QtiMarshallerUtil::marshallValidQti(new ObjectElement($src, MimeUtil::guessMimeType(basename($src))));
             }
         // Process regular question feature
         } else {
             $nodeClassAttribute = $node->attr['class'];
             $featureReference = $this->getFeatureReferenceFromClassName($nodeClassAttribute);
-            $feature = $this->widgets[$featureReference];
-            $type = $feature['data']['type'];
-
-            if ($type === 'audioplayer' || $type === 'audioplayer') {
-                $src = $feature['data']['src'];
+            $feature = $this->widgets; //[$featureReference];
+            $type = $feature[1]['type'];
+            if ($type === 'audioplayer' || $type === 'videoplayer') {
+                $src = $feature[1]['src'];
                 $object = new ObjectElement($src, MimeUtil::guessMimeType(basename($src)));
                 $object->setLabel($featureReference);
                 return QtiMarshallerUtil::marshallValidQti($object);
 
-            } else if ($type === 'sharedpassage') {
+            } elseif ($type === 'sharedpassage') {
 
                 $flowCollection = new FlowCollection();
                 $div = $this->createDivForSharedPassage();
@@ -104,14 +102,15 @@ class LearnosityToQtiPreProcessingService
         foreach ($parts as $part) {
             
             if (StringUtil::startsWith(strtolower($part), 'feature-')) {
-                return str_replace('feature-','',$parts[1]); 
+                return str_replace('feature-', '', $parts[1]);
             }
         }
         // TODO: throw exception
         return null;
     }
     
-    private function createDivForSharedPassage(){
+    private function createDivForSharedPassage()
+    {
         $div = new Div();
         $div->setClass(Constants::SHARED_PASSAGE_DIV_CLASS);
         return $div;

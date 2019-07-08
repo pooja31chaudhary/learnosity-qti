@@ -8,22 +8,22 @@ use LearnosityQti\Entities\BaseQuestionType;
 * This class is auto-generated based on Schemas API and you should not modify its content
 * Metadata: {"responses":"v2.108.0","feedback":"v2.71.0","features":"v2.107.0"}
 */
-class videoplayer extends BaseQuestionType {
+class videoplayer extends BaseQuestionType
+{
     protected $type;
     protected $metadata;
     protected $simplefeature_id;
+    protected $src;
     protected $player_type;
     protected $heading;
     protected $caption;
     
-    public function __construct(
-                    $type,
-                                $player_type
-                        )
+    public function __construct($type, $player_type, $src)
     {
-                $this->type = $type;
-                $this->player_type = $player_type;
-            }
+        $this->type = $type;
+        $this->player_type = $player_type;
+        $this->src = $src;
+    }
 
     /**
     * Get Feature Type \
@@ -41,6 +41,22 @@ class videoplayer extends BaseQuestionType {
     */
     public function set_type ($type) {
         $this->type = $type;
+    }
+
+    /**
+    * Get src of the video \
+    * @return type
+    */
+    public function get_src() {
+        return $this->src;
+    }
+
+    /**
+    * Set src of the video
+    * @param string $src \
+    */
+    public function set_src() {
+        $this->src = $src;
     }
 
     /**
@@ -133,9 +149,7 @@ class videoplayer extends BaseQuestionType {
         $this->caption = $caption;
     }
 
-    
     public function get_widget_type() {
-    return 'feature';
+        return 'feature';
     }
 }
-

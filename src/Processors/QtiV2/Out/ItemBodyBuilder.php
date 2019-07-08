@@ -1,5 +1,7 @@
 <?php
+
 namespace LearnosityQti\Processors\QtiV2\Out;
+
 use LearnosityQti\Services\LogService;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use LearnosityQti\Utils\SimpleHtmlDom\SimpleHtmlDom;
@@ -53,26 +55,32 @@ class ItemBodyBuilder
         }
     }
     
-    private function removeUnusedSpanFromContent(array $interactions, $content) {
-        
+    private function removeUnusedSpanFromContent(array $interactions, $content)
+    {
         $dom = new DOMDocument();
         $dom->loadHTML($content);
         $dom->formatOutput = true;
         
         $xpath = new DOMXpath($dom);
         $class = 'learnosity-response';
+        $featureClass = 'learnosity-feature';
         $spanTag = $xpath->query("//span[contains(@class,'$class')]");
-        
-        foreach($spanTag as $span) {
+        foreach ($spanTag as $span) {
             $questionReference = trim(str_replace('learnosity-response question-', '', $span->getAttribute('class')));
-            if(!isset($interactions[$questionReference])) {
+            if (!isset($interactions[$questionReference])) {
                 $span->parentNode->removeChild($span);
             }
         }
+
+        $featureSpanTag = $xpath->query("//span[contains(@class, '$featureClass')]");
+        foreach ($featureSpanTag as $span) {
+            $span->parentNode->removeChild($span);
+        }
+        // remove doctype and html, body tag
         $dom->removeChild($dom->doctype);
         $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
+  
         $newHtml = $dom->saveHTML();
-        
         return $newHtml;
     }
     
@@ -96,7 +104,7 @@ class ItemBodyBuilder
         // Iterate through these elements and try to replace every single question `span` with its interaction equivalent
         $iterator = $divWrapper->getIterator();
         foreach ($iterator as $component) {
-             if ($component instanceof Span && StringUtil::contains($component->getClass(), 'learnosity-response')) {
+            if ($component instanceof Span && StringUtil::contains($component->getClass(), 'learnosity-response')) {
                 $currentContainer = $iterator->getCurrentContainer();
                 $questionReference = trim(str_replace('learnosity-response', '', $component->getClass()));
                 $questionReference = trim(str_replace('question-', '', $questionReference));
@@ -105,9 +113,9 @@ class ItemBodyBuilder
                 $interaction = $interactions[$questionReference]['interaction'];
                 $content = new FlowCollection();
                 if (isset($interactions[$questionReference]['extraContent'])) {
-                    // In case of shorttext its throwing error and closing div tag above the interaction 
+                    // In case of shorttext its throwing error and closing div tag above the interaction
                     $questionTypeArr = ['shorttext','clozetext','clozedropdown'];
-                    if(!in_array($questionType, $questionTypeArr)){
+                    if (!in_array($questionType, $questionTypeArr)) {
                         $content->attach($interactions[$questionReference]['extraContent']);
                     }
                 }
