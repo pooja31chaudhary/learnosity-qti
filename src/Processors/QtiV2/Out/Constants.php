@@ -21,6 +21,11 @@ class Constants
         'hotspot'
     ];
 
+    public static $supportedFeatureTypes = [
+        'videoplayer',
+        'audioplayer'
+    ];
+
     /**
      * Note that only question types that maps to response declaration with `single` baseType would be able to be mapped with `mapping`.
      * Ignored for now :
@@ -38,5 +43,4 @@ class Constants
     //const RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE = 'http://www.imsglobal.org/question/qtiv2p1/rptemplates/map_response.xml';
     const RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE = 'http://www.imsglobal.org/question/qti_v2p1/rptemplates/map_response';
     const SHARED_PASSAGE_DIV_CLASS = 'col-xs-6';
-    
 }

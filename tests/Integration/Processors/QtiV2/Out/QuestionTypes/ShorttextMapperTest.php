@@ -19,7 +19,7 @@ class ShorttextMapperTest extends AbstractQuestionTypeTest
 
         // Has <textEntryInteraction> as the first and only interaction
         /** @var TextEntryInteraction $interaction */
-        foreach($assessmentItemArray as $assessmentItem) {
+        foreach ($assessmentItemArray as $assessmentItem) {
             $interaction = $assessmentItem->getComponentsByClassName('textEntryInteraction', true)->getArrayCopy()[0];
 
             // Test basic attributes
@@ -30,8 +30,7 @@ class ShorttextMapperTest extends AbstractQuestionTypeTest
             // Shorttext shall have one simple `map_response` <responseDeclaration> and <responseProcessing>
             /** @var ResponseDeclaration $responseDeclaration */
             $responseDeclaration = $assessmentItem->getResponseDeclarations()->getArrayCopy()[0];
-            $this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE, $assessmentItem->getResponseProcessing()->getTemplate());
-
+            
             /** @var Value[] $values */
             $values = $responseDeclaration->getCorrectResponse()->getValues()->getArrayCopy(true);
             $this->assertEquals('Canbera', $values[0]->getValue());
@@ -54,7 +53,7 @@ class ShorttextMapperTest extends AbstractQuestionTypeTest
     </div>';
             $this->assertEquals($expectedString, $itemBodyContent);
             
-        }   
+        }
     }
     
     public function testShorttextQuestionWithSimpleValidationAndFeedback()
@@ -64,7 +63,7 @@ class ShorttextMapperTest extends AbstractQuestionTypeTest
 
         // Has <textEntryInteraction> as the first and only interaction
         /** @var TextEntryInteraction $interaction */
-        foreach($assessmentItemArray as $assessmentItem) {
+        foreach ($assessmentItemArray as $assessmentItem) {
             $interaction = $assessmentItem->getComponentsByClassName('textEntryInteraction', true)->getArrayCopy()[0];
 
             // Test basic attributes
@@ -92,6 +91,6 @@ class ShorttextMapperTest extends AbstractQuestionTypeTest
             $mapEntries = $responseDeclaration->getMapping()->getMapEntries()->getArrayCopy(true);
             $this->assertEquals('Canbera', $mapEntries[0]->getMapKey());
             $this->assertEquals(10, $mapEntries[0]->getMappedValue());
-        }   
+        }
     }
 }

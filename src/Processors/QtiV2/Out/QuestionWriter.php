@@ -1,9 +1,9 @@
 <?php
+
 namespace LearnosityQti\Processors\QtiV2\Out;
 
 use LearnosityQti\Entities\Question;
 use LearnosityQti\Services\LogService;
-use LearnosityQti\Utils\QtiMarshallerUtil;
 use LearnosityQti\Utils\StringUtil;
 use qtism\common\utils\Format;
 use qtism\data\storage\xml\XmlDocument;

@@ -5,7 +5,6 @@ namespace LearnosityQti\Processors\QtiV2\Out\Validation;
 use LearnosityQti\Processors\QtiV2\Out\Constants;
 use LearnosityQti\Processors\QtiV2\Out\ResponseProcessingBuilders\QtiResponseProcessingBuilder;
 use LearnosityQti\Services\LogService;
-use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\processing\ResponseProcessing;
 
 abstract class AbstractQuestionValidationBuilder
@@ -13,10 +12,10 @@ abstract class AbstractQuestionValidationBuilder
     private $supportedScoringType = ['exactMatch'];
     abstract protected function buildResponseDeclaration($responseIdentifier, $validation);
     
-    public function buildValidation($responseIdentifier,$validation,$feedBackOptions = array() ,$isCaseSensitive = true)
+    public function buildValidation($responseIdentifier, $validation, $feedBackOptions = array(), $isCaseSensitive = true)
     {
         // Some basic validation on the `validation` object
-        if(empty($validation) && empty($feedBackOptions)){
+        if (empty($validation) && empty($feedBackOptions)) {
             return [null, null];
         }
         /*
@@ -40,7 +39,7 @@ abstract class AbstractQuestionValidationBuilder
         
         $responseDeclaration = $this->buildResponseDeclaration($responseIdentifier, $validation);
         $responseIdentifiers = [];
-        foreach($responseDeclaration as $key => $value){
+        foreach ($responseDeclaration as $key => $value) {
             $responseIdentifiers[] = $key;
         }
         
@@ -50,25 +49,25 @@ abstract class AbstractQuestionValidationBuilder
         $maxscore = 0;
         $penalty = 0;
         
-        if(method_exists($validation, 'get_valid_response')){
-            $score = $validation->get_valid_response()->get_score(); 
+        if (method_exists($validation, 'get_valid_response')) {
+            $score = $validation->get_valid_response()->get_score();
         }
-        if(method_exists($validation, 'get_max_score') && $validation->get_max_score()!=''){
+
+        if (method_exists($validation, 'get_max_score') && $validation->get_max_score()!='') {
             $type[] = 'maxscore';
             $maxscore = $validation->get_max_score();
         }
-        if(method_exists($validation, 'get_penalty') && $validation->get_penalty()!=''){
+        if (method_exists($validation, 'get_penalty') && $validation->get_penalty()!='') {
             $type[] = 'penalty';
             $penalty = $validation->get_penalty();
         }
         
-        if(sizeof($responseIdentifiers)>1){
-            $responseProcessing = QtiResponseProcessingBuilder::buildResponseProcessingWithMultipleResponse($score,$maxscore,$penalty,$feedBackOptions, $type , $responseIdentifiers);
-        }else{
-            if(!empty($feedBackOptions) && is_array($feedBackOptions) || in_array('maxscore', $type) || in_array('penalty', $type)){
-                $responseProcessing = QtiResponseProcessingBuilder::build($score,$maxscore,$penalty,$feedBackOptions, $type);
-            }else{ 
-                
+        if (sizeof($responseIdentifiers)>1) {
+            $responseProcessing = QtiResponseProcessingBuilder::buildResponseProcessingWithMultipleResponse($score, $maxscore, $penalty, $feedBackOptions, $type, $responseIdentifiers);
+        } else {
+            if (!empty($feedBackOptions) && is_array($feedBackOptions) || in_array('maxscore', $type) || in_array('penalty', $type)) {
+                $responseProcessing = QtiResponseProcessingBuilder::build($score, $maxscore, $penalty, $feedBackOptions, $type);
+            } else {
                 $responseProcessing = $this->buildResponseProcessing($validation, $isCaseSensitive);
             }
         }
@@ -94,18 +93,17 @@ abstract class AbstractQuestionValidationBuilder
         }
 
         // Warn and remove `alt_responses` because couldn't support responseDeclaration with multiple valid answers
-        if ((method_exists($validation, 'get_alt_responses')) && !empty($validation->get_alt_responses())){
+        if ((method_exists($validation, 'get_alt_responses')) && !empty($validation->get_alt_responses())) {
             $validation->set_alt_responses([]);
             LogService::log('Does not support multiple validation responses for `responseDeclaration`, only use `valid_response`, ignoring `alt_responses`');
         }
 
         // Warn since we only support match_correct, can't support `$isCaseSensitive`
-        if ($isCaseSensitive == false){
+        if ($isCaseSensitive == false) {
             LogService::log('Only support mapping to `matchCorrect` template, thus case sensitivity is ignored');
         }
         $responseProcessing = new ResponseProcessing();
         $responseProcessing->setTemplate(Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT);
         return $responseProcessing;
     }
-
 }

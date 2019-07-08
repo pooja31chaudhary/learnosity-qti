@@ -2,7 +2,6 @@
 
 namespace LearnosityQti\Processors\QtiV2\Out\QuestionTypes;
 
-
 use LearnosityQti\Entities\BaseQuestionType;
 use LearnosityQti\Entities\QuestionTypes\shorttext;
 use LearnosityQti\Processors\QtiV2\Out\ContentCollectionBuilder;
@@ -27,8 +26,7 @@ class ShorttextMapper extends AbstractQuestionTypeMapper
 
         $metadata = $question->get_metadata();
         $feedbackOptions = [];
-        
-        if(isset($metadata) && !empty($metadata->get_distractor_rationale())){
+        if (isset($metadata) && !empty($metadata->get_distractor_rationale())) {
             $feedbackOptions['genral_feedback'] = $metadata->get_distractor_rationale();
         }
         
@@ -47,26 +45,18 @@ class ShorttextMapper extends AbstractQuestionTypeMapper
         // Build those validation
         $isCaseSensitive = $question->get_case_sensitive() === null ? false : $question->get_case_sensitive();
         $validationBuilder = new ShorttextValidationBuilder($isCaseSensitive);
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation(
-                $interactionIdentifier,
-                $question->get_validation(),
-                $feedbackOptions,
-                $isCaseSensitive
-            );
-        }else{ 
-            list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation(
-                $interactionIdentifier,
-                $question->get_validation(),
-                $isCaseSensitive
-            );
-        }
+        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation(
+            $interactionIdentifier,
+            $question->get_validation(),
+            $isCaseSensitive,
+            $feedbackOptions
+        );
 
         // TODO: This is a freaking hack
         // Wrap this interaction in a block since our `shorttext` meant to be blocky and not inline
         $div = new Div();
         $contentCollection = QtiMarshallerUtil::unmarshallElement($this->extraContent);
-        $extracontent = ContentCollectionBuilder::buildFlowCollectionContent($contentCollection); 
+        $extracontent = ContentCollectionBuilder::buildFlowCollectionContent($contentCollection);
         $div->setContent($extracontent);         
         $content = new FlowCollection();
         $content->merge($extracontent);
