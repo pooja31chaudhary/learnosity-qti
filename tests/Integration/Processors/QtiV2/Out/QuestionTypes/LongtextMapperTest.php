@@ -40,7 +40,7 @@ class LongtextMapperTest extends AbstractQuestionTypeTest
     {
         $data = json_decode($this->getFixtureFileContents('learnosityjsons/longtext_validation.json'), true);
         $assessmentItemArray = $this->convertToAssessmentItem($data);
-
+        
         foreach($assessmentItemArray as $assessmentItem){
             
             // Longtext shall have no <responseDeclaration> and <responseProcessing>
@@ -52,12 +52,12 @@ class LongtextMapperTest extends AbstractQuestionTypeTest
             $responseIf = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseIf', true)->getArrayCopy()[0];
             $this->assertTrue($responseIf instanceof ResponseIf);
             $promptIfString = QtiMarshallerUtil::marshallCollection($responseIf->getComponents());
-            $this->assertEquals('<isNull><variable identifier="RESPONSE"/></isNull><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue><setOutcomeValue identifier="FEEDBACK_GENERAL"><baseValue baseType="identifier">correctOrIncorrect</baseValue></setOutcomeValue>', $promptIfString);
+            $this->assertEquals('<isNull><variable identifier="RESPONSE"/></isNull><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue>', $promptIfString);
 
             $responseElse = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseElse', true)->getArrayCopy()[0];
             $this->assertTrue($responseElse instanceof ResponseElse);
             $promptElseString = QtiMarshallerUtil::marshallCollection($responseElse->getComponents());
-            $this->assertEquals('<responseCondition><responseIf><match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match><setOutcomeValue identifier="SCORE"><variable identifier="MAXSCORE"/></setOutcomeValue><setOutcomeValue identifier="FEEDBACK_GENERAL"><baseValue baseType="identifier">correctOrIncorrect</baseValue></setOutcomeValue></responseIf><responseElse><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue><setOutcomeValue identifier="FEEDBACK_GENERAL"><baseValue baseType="identifier">correctOrIncorrect</baseValue></setOutcomeValue></responseElse></responseCondition>', $promptElseString);
+            $this->assertEquals('<responseCondition><responseIf><match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match><setOutcomeValue identifier="SCORE"><variable identifier="MAXSCORE"/></setOutcomeValue></responseIf><responseElse><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue></responseElse></responseCondition>', $promptElseString);
         
             // Has <extendedTextInteraction> as the first and only interaction
             /** @var ExtendedTextInteraction $interaction */
