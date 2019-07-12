@@ -11,8 +11,8 @@ class FeatureItemBuilder
      */
     private $doc;
     
-    private $doctype = '<!DOCTYPE html>'; 
-
+    private $doctype = '<!DOCTYPE html>';
+    
     public function __construct()
     {
         $this->doc = new DOMDocument();
@@ -35,15 +35,12 @@ class FeatureItemBuilder
 
     public function build(array $feature)
     {
-
-        if (isset($feature['data']['type']) == 'sharedpassage') {
-            $html = $this->doc->getElementsByTagName('html')->item(0);
-            $body = $html->appendChild($this->doc->createElement('body'));
-            $body->appendChild($this->doc->createElement('h3', $feature['data']['heading']));
-            $body->appendChild($this->doc->createElement('p', $feature['data']['content']));
-            $html->appendChild($body);
-        }
-
+        $html = $this->doc->getElementsByTagName('html')->item(0);
+        $body = $html->appendChild($this->doc->createElement('body'));
+        $body->appendChild($this->doc->createElement('h3', $feature['data']['heading']));
+        $body->appendChild($this->doc->createElement('p', $feature['data']['content']));
+        $html->appendChild($body);
+        
         return $this->doctype . $this->doc->saveHTML();
     }
 }

@@ -6,7 +6,7 @@ use qtism\common\enums\BaseType;
 use qtism\common\enums\Cardinality;
 use qtism\data\state\ResponseDeclaration;
 
-class AudioplayerValidationBuilder extends AbstractQuestionValidationBuilder
+class featureValidationBuilder extends AbstractQuestionValidationBuilder
 {
     protected function buildResponseDeclaration($responseIdentifier, $validation)
     {
@@ -14,12 +14,14 @@ class AudioplayerValidationBuilder extends AbstractQuestionValidationBuilder
         $responseDeclaration = new ResponseDeclaration($responseIdentifier);
         $responseDeclaration->setCardinality(Cardinality::SINGLE);
         $responseDeclaration->setBaseType(BaseType::STRING);
+
         return $responseDeclaration;
     }
 
     public function buildValidation($responseIdentifier, $validation, $isCaseSensitive = true, $distractorRationaleResponseLevel = array())
     {
         $responseProcessing = null;
+        
         $responseDeclaration = $this->buildResponseDeclaration($responseIdentifier, $validation);
         return [$responseDeclaration, $responseProcessing];
     }

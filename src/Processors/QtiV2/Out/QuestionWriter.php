@@ -37,9 +37,13 @@ class QuestionWriter
         
         if (is_array($featureArray) && sizeof($featureArray) > 0) {
             foreach ($featureArray as $feature) {
-                $featureBuilder = new FeatureItemBuilder();
-                $featureHtml = $featureBuilder->build($feature);
-                $featureBuilderArray[$question->get_reference()] = array($feature['reference']=>$featureHtml);
+                if ($feature['data']['type']=='sharedpassage') {
+                    $featureBuilder = new FeatureItemBuilder();
+                    $featureHtml = $featureBuilder->build($feature);
+                    $featureBuilderArray[$question->get_reference()] = array($feature['reference']=>$featureHtml);
+                } else {
+                    $featureBuilderArray['features'] = $feature['reference'];
+                }
             }
         }
         // Flush out all the error messages stored in this static class, also ensure they are unique

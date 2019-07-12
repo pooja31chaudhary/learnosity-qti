@@ -304,11 +304,9 @@ class Converter
 
     private static function convertLearnosityQuestion(array $questionJson)
     {
-        if (isset($questionJson['feature'])) {
-            $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson['feature']);
-        } else {
-            $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson);
-        }
+       
+        $preprocessingService = new LearnosityToQtiPreProcessingService($questionJson['feature']);
+        
         $questionMapper = new QuestionMapper();
         $questionWriter = new QuestionWriter();
         

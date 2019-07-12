@@ -125,7 +125,6 @@ class ConvertToQtiService
     */
     protected function decorateImsManifestRootElement(DOMElement $rootElement)
     {
-        
         $xsdLocation = 'http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd';
         $xmlns = "http://www.imsglobal.org/xsd/imscp_v1p1";
         $rootElement->setAttribute('xmlns', $xmlns);
@@ -218,7 +217,6 @@ class ConvertToQtiService
     private function convertAssessmentItem($json)
     {
         $result = [];
-
         if ($this->format=='canvas') {
             $json['content'] = strip_tags($json['content'], "<span>");
         }
@@ -226,19 +224,19 @@ class ConvertToQtiService
         $content = $json['content'];
         $features = $json['features'];
         if (is_array($features) && sizeof($features) > 0) {
-            //$this->createSharedPassageFolder($this->outputPath . '/' . $this->rawPath);
+            $this->createSharedPassageFolder($this->outputPath . '/' . $this->rawPath);
         }
         if (!empty($json['questions'])) {
             foreach ($json['questions'] as $question) {
                 $question['content'] = $content;
-                //$question['feature'] = $features;
+                $question['feature'] = $features;
                 if (in_array($question['data']['type'], LearnosityExportConstant::$supportedQuestionTypes)) {
                     $result = Converter::convertLearnosityToQtiItem($question);
                     $result[0] = str_replace('/vendor/learnosity/itembank/', '', $result[0]);
                     $finalXml['questions'][] = $result;
                 } else {
                     $result = [
-                    '',
+                        '',
                         [
                             'Ignoring' . $question['data']['type'] . ' , currently unsupported'
                         ]
@@ -247,7 +245,7 @@ class ConvertToQtiService
                 }
             }
         }
-        if (!empty($json['features'])) {
+        if (!empty($json['features']) && empty($json['questions'])) {
             foreach ($json['features'] as $feature) {
                 $feature['content'] = $content;
                 if (in_array($feature['data']['type'], LearnosityExportConstant::$supportedFeatureTypes)) {
@@ -429,7 +427,7 @@ class ConvertToQtiService
                     }
                 }
 
-                if (!empty($result['json']['features'])) {
+                if (!empty($result['json']['features']) && empty($result['json']['questions'])) {
                     foreach ($result['qti']['features'] as $key => $value) {
                         file_put_contents($outputFilePath . '/' . $result['json']['features'][$key]['reference'] . '.xml', $value[0]);
                     }
@@ -458,7 +456,7 @@ class ConvertToQtiService
                 $resourcesArray[] = $this->addQuestionReference($result['json']['questions'], $featureArray, $result, $additionalFileReferenceInfo);
             }
 
-            if (!empty($result['json']['features'])) {
+            if (!empty($result['json']['features']) && empty($result['json']['questions'])) {
                 $resourcesArray[] = $this->addFeatureReference($result['json']['features'], $result, $additionalFileReferenceInfo);
             }
         }
@@ -480,6 +478,9 @@ class ConvertToQtiService
                 }
                 if (sizeof($featureArray) > 0 && array_key_exists($question['reference'], $featureArray)) {
                     $files = $this->addFeatureHtmlFilesInfo($featureArray[$question['reference']], $files);
+                }
+                if (sizeof($featureArray) > 0 && array_key_exists('features', $featureArray)) {
+                    $files = $this->addAdditionalFileInfo($additionalFileReferenceInfo[$featureArray['features']], $files);
                 }
                 $file = new File();
                 $file->setHref($question['reference'].".xml");
@@ -516,6 +517,18 @@ class ConvertToQtiService
     }
     
     private function addFeatureHtmlFilesInfo($featureHtmlArray, array $files)
+    {
+        foreach ($featureHtmlArray as $featureId => $featureHtml) {
+            if (file_put_contents($this->outputPath . '/' . $this->rawPath . '/' . self::SHARED_PASSAGE_FOLDER_NAME . '/' . $featureId . '.html', $featureHtml)) {
+                $file = new File();
+                $file->setHref(self::SHARED_PASSAGE_FOLDER_NAME . '/' . $featureId . '.html');
+                $files[] = $file;
+            }
+        }
+        return $files;
+    }
+
+    private function addFeatureFilesInfo($featureArray, array $files)
     {
         foreach ($featureHtmlArray as $featureId => $featureHtml) {
             if (file_put_contents($this->outputPath . '/' . $this->rawPath . '/' . self::SHARED_PASSAGE_FOLDER_NAME . '/' . $featureId . '.html', $featureHtml)) {

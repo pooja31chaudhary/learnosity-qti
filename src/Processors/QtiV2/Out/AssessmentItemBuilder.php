@@ -5,12 +5,16 @@ namespace LearnosityQti\Processors\QtiV2\Out;
 use LearnosityQti\Entities\Feature;
 use LearnosityQti\Entities\Question;
 use LearnosityQti\Exceptions\MappingException;
+use LearnosityQti\Processors\QtiV2\Out\Validation\featureValidationBuilder;
+use LearnosityQti\Utils\MimeUtil;
 use LearnosityQti\Utils\StringUtil;
 use qtism\common\enums\BaseType;
 use qtism\common\enums\Cardinality;
 use qtism\common\utils\Format;
 use qtism\data\AssessmentItem;
 use qtism\data\content\FlowStaticCollection;
+use qtism\data\content\interactions\MediaInteraction;
+use qtism\data\content\xhtml\ObjectElement;
 use qtism\data\content\ModalFeedback;
 use qtism\data\content\ModalFeedbackCollection;
 use qtism\data\content\TextRun;
@@ -37,7 +41,6 @@ class AssessmentItemBuilder
     }
     public function build($itemIdentifier, $itemLabel, array $questions, $content = '')
     {
-       
         // Initialise our <assessmentItem>
         $assessmentItem = new AssessmentItem($itemIdentifier, $itemIdentifier, false);
         $assessmentItem->setLabel($itemLabel);
@@ -52,6 +55,13 @@ class AssessmentItemBuilder
         foreach ($questions as $question) {
             
             $questionData = $question->to_array();
+            if (!empty($questionData['features']) && in_array($questionData['features'][0]['data']['type'], ['audioplayer', 'videoplayer'])) {
+                list($mediaInteraction, $mediaResponseDeclaration) = $this->buildMediaInteraction($questionData);
+                if (isset($mediaInteraction)) {
+                    $interactions['features']['interaction'] = $mediaInteraction;
+                }
+            }
+ 
             $content = $questionData['content'];
             $questionType = $questionData['type'];
             $assessmentItem->setOutcomeDeclarations($this->buildScoreOutcomeDeclarations(0, 'SCORE'));
@@ -86,7 +96,6 @@ class AssessmentItemBuilder
             // The extraContent usually comes from `stimulus` of item that mapped to inline interaction and has no `prompt`
             list($interaction, $responseDeclaration, $responseProcessing, $extraContent) = $this->map($question);
             if (!empty($responseDeclaration)) {
-                
                 if ($responseDeclaration instanceof ResponseDeclarationCollection && $responseDeclaration->count()>0) {
                     for ($i=1; $i<=sizeof($responseDeclaration); $i++) {
                         $assessmentItem->setOutcomeDeclarations($this->buildScoreOutcomeDeclarations(0.0, 'SCORE'.$i));
@@ -94,6 +103,10 @@ class AssessmentItemBuilder
                     $responseDeclarationCollection->merge($responseDeclaration);
                 } else {
                     $responseDeclarationCollection->attach($responseDeclaration);
+                }
+
+                if (isset($mediaResponseDeclaration)) {
+                    $responseDeclarationCollection->attach($mediaResponseDeclaration);
                 }
             }
             
@@ -109,7 +122,6 @@ class AssessmentItemBuilder
         }
         
         // Build <itemBody>
-        
         $assessmentItem->setItemBody($this->itemBodyBuilder->buildItemBody($interactions, $content, $questionType));
         // Map <responseDeclaration>
         if (!empty($responseDeclarationCollection)) {
@@ -163,7 +175,6 @@ class AssessmentItemBuilder
         // Initialise our <assessmentItem>
         $assessmentItem = new AssessmentItem($itemIdentifier, $itemIdentifier, false);
         $assessmentItem->setLabel($itemLabel);
-        //$assessmentItem->setOutcomeDeclarations($this->buildOutcomeDeclarations());
         $assessmentItem->setToolName('Learnosity');
         
         // Store interactions on this array to later be placed on <itemBody>
@@ -172,53 +183,26 @@ class AssessmentItemBuilder
         $responseProcessingTemplates = [];
         
         foreach ($features as $feature) {
-            
             $featureData = $feature->to_array();
             $content = $featureData['content'];
             $featureType = $featureData['type'];
             $assessmentItem->setOutcomeDeclarations($this->buildScoreOutcomeDeclarations(0, 'SCORE'));
             
-            // add outcome declaration for MAXSCORE
-            if (isset($questionData['data']['validation']['max_score'])) {
-                $max_score = $questionData['data']['validation']['max_score'];
-                $assessmentItem->setOutcomeDeclarations($this->buildScoreOutcomeDeclarations($max_score, 'MAXSCORE'));
-            }
-
-            /** @var Feature $feature */
             // Map the `features` to be placed at <itemBody>
             list($interaction, $responseDeclaration, $responseProcessing) = $this->mapFeature($feature);
             if (!empty($responseDeclaration)) {
                 $responseDeclarationCollection->attach($responseDeclaration);
             }
-            
-            if (!empty($responseProcessing)) {
-                /** @var ResponseProcessing $responseProcessing */
-                $responseProcessingTemplates[] = $responseProcessing->getTemplate();
-            }
-            
             $interactions[$feature->get_reference()]['interaction'] = $interaction;
         }
         
         // Build <itemBody>
-        
         $assessmentItem->setItemBody($this->itemBodyBuilder->buildItemBody($interactions, $content, $featureType));
         // Map <responseDeclaration>
         if (!empty($responseDeclarationCollection)) {
             $assessmentItem->setResponseDeclarations($responseDeclarationCollection);
         }
-        // Map <responseProcessing> - combine response processing from questions
-        // TODO: Tidy up this stuff
-        if (!empty($responseProcessingTemplates)) {
-            if (!empty($responseProcessingTemplates[0])) {
-                $templates = array_unique($responseProcessingTemplates);
-                $isOnlyMatchCorrect = count($templates) === 1 && $templates[0] === Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT;
-                $responseProcessing = new ResponseProcessing();
-                $responseProcessing->setTemplate($isOnlyMatchCorrect ? Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT : Constants::RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE);
-                $assessmentItem->setResponseProcessing($responseProcessing);
-            } else {
-                $assessmentItem->setResponseProcessing($responseProcessing);
-            }
-        }
+        
         return $assessmentItem;
     }
 
@@ -231,23 +215,14 @@ class AssessmentItemBuilder
         $clazz = new \ReflectionClass(self::MAPPER_CLASS_BASE . ucfirst($type . 'Mapper'));
         $featureTypeMapper = $clazz->newInstance();
         
-        // Try to use question `reference` as identifier
+        // Try to use feature `reference` as identifier
         // Otherwise, generate an alternative identifier and store the original reference as `label` to be passed in
         $featureReference = $feature->get_reference();
-        //$interactionIdentifier = Format::isIdentifier($featureReference, false) ? $featureReference : strtoupper($type)  . '_' . StringUtil::generateRandomString(12);
-        
-        /* if ($interactionIdentifier !== $questionReference) {
-            LogService::log(
-                "The question `reference` ($questionReference) is not a valid identifier. " .
-                "Replaced it with randomly generated `$interactionIdentifier` and stored the original `reference` as `label` attribute"
-            );
-        } */
         $interactionIdentifier = 'RESPONSE';
         $result = $featureTypeMapper->convert($feature->get_data(), $interactionIdentifier, $featureReference);
-        //$result[] = $questionTypeMapper->getExtraContent();
         return $result;
     }
-    
+
     private function buildScoreOutcomeDeclarations($score, $type)
     {
         // Set <outcomeDeclaration> with assumption default value is always 0
@@ -276,7 +251,25 @@ class AssessmentItemBuilder
         $modalFeedback = new ModalFeedback($identifier, $outComeidentifier, $content);
         return $modalFeedback;
     }
-    
+
+    private function buildMediaInteraction($questionData)
+    {
+        $src = $questionData['features'][0]['data']['src'];
+        $object = new ObjectElement($src, MimeUtil::guessMimeType($src));
+        // Build final interaction and its corresponding <responseDeclaration>, and its <responseProcessingTemplate>
+        $mediaInteraction = new MediaInteraction('MEDIA_RESPONSE', true, $object);
+        $mediaInteraction->setAutostart(true);
+        $mediaInteraction->setMinPlays(1);
+        $mediaInteraction->setMaxPlays(5);
+        $mediaInteraction->setLabel($questionData['features'][0]['reference']);
+        // Set loop
+        $mediaInteraction->setLoop(false);
+        $builder = new featureValidationBuilder();
+        list($responseDeclaration) = $builder->buildValidation('MEDIA_RESPONSE', '', []);
+       
+        return [$mediaInteraction, $responseDeclaration];
+    }
+
     private function getBaseType($questionType)
     {
         switch ($questionType) {

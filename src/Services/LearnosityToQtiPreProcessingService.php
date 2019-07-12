@@ -44,7 +44,7 @@ class LearnosityToQtiPreProcessingService
         foreach ($html->find($selfClosingTags) as &$node) {
             $node->outertext = rtrim($node->outertext, '>') . '/>';
         }
-
+        
         // Replace these audioplayer and videoplayer feature with <object> nodes
         foreach ($html->find('span.learnosity-feature') as &$node) {
             try {
@@ -72,14 +72,19 @@ class LearnosityToQtiPreProcessingService
         } else {
             $nodeClassAttribute = $node->attr['class'];
             $featureReference = $this->getFeatureReferenceFromClassName($nodeClassAttribute);
-            $feature = $this->widgets; //[$featureReference];
-            $type = $feature[1]['type'];
-            if ($type === 'audioplayer' || $type === 'videoplayer') {
+            if (isset($this->widgets[$featureReference])) {
+                $feature = $this->widgets[$featureReference];
+                $type = $feature['data']['type'];
+                $src = $feature['data']['src'];
+            } else {
+                $feature = $this->widgets;
+                $type = $feature[1]['type'];
                 $src = $feature[1]['src'];
+            }
+            if ($type === 'audioplayer' || $type === 'videoplayer') {
                 $object = new ObjectElement($src, MimeUtil::guessMimeType(basename($src)));
                 $object->setLabel($featureReference);
-                return QtiMarshallerUtil::marshallValidQti($object);
-
+                //return QtiMarshallerUtil::marshallValidQti($object);
             } elseif ($type === 'sharedpassage') {
 
                 $flowCollection = new FlowCollection();

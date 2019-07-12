@@ -72,14 +72,10 @@ class ItemBodyBuilder
             }
         }
 
-        $featureSpanTag = $xpath->query("//span[contains(@class, '$featureClass')]");
-        foreach ($featureSpanTag as $span) {
-            $span->parentNode->removeChild($span);
-        }
-        // remove doctype and html, body tag
+        // remove doctype and html tag
         $dom->removeChild($dom->doctype);
-        $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
-  
+        $dom->replaceChild($dom->firstChild->firstChild, $dom->firstChild);
+        
         $newHtml = $dom->saveHTML();
         return $newHtml;
     }
@@ -91,8 +87,8 @@ class ItemBodyBuilder
         // TODO: to avoid QtiComponentIterator bug ignoring 2nd element with empty content
 
         $content = $this->removeUnusedSpanFromContent($interactions, $content);
+        $content = strip_tags($content, "<span><div>");
         $contentCollection = QtiMarshallerUtil::unmarshallElement($content);
-        
         $wrapperCollection = new FlowCollection();
         foreach ($contentCollection as $component) {
             $wrapperCollection->attach($component);
@@ -103,23 +99,37 @@ class ItemBodyBuilder
         
         // Iterate through these elements and try to replace every single question `span` with its interaction equivalent
         $iterator = $divWrapper->getIterator();
+
         foreach ($iterator as $component) {
+
+            if ($component instanceof Span && StringUtil::contains($component->getClass(), 'learnosity-feature')) {
+                $currentContainer = $iterator->getCurrentContainer();
+                $content = new FlowCollection();
+
+                // Build the media interaction
+                $interaction = $interactions['features']['interaction'];
+                $content->attach($interaction);
+    
+                $replacement = ContentCollectionBuilder::buildContent($currentContainer, $content)->current();
+                $currentContainer->getComponents()->replace($component, $replacement);
+            }
+
             if ($component instanceof Span && StringUtil::contains($component->getClass(), 'learnosity-response')) {
                 $currentContainer = $iterator->getCurrentContainer();
+                $content = new FlowCollection();
                 $questionReference = trim(str_replace('learnosity-response', '', $component->getClass()));
                 $questionReference = trim(str_replace('question-', '', $questionReference));
                 
                 // Build the actual interaction
                 $interaction = $interactions[$questionReference]['interaction'];
-                $content = new FlowCollection();
+                
                 if (isset($interactions[$questionReference]['extraContent'])) {
                     // In case of shorttext its throwing error and closing div tag above the interaction
-                    $questionTypeArr = ['shorttext','clozetext','clozedropdown'];
+                    $questionTypeArr = ['shorttext', 'clozetext', 'clozedropdown'];
                     if (!in_array($questionType, $questionTypeArr)) {
                         $content->attach($interactions[$questionReference]['extraContent']);
                     }
                 }
-                
                 $content->attach($interaction);
                 $replacement = ContentCollectionBuilder::buildContent($currentContainer, $content)->current();
                 $currentContainer->getComponents()->replace($component, $replacement);
