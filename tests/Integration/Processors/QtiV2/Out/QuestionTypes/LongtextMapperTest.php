@@ -40,7 +40,7 @@ class LongtextMapperTest extends AbstractQuestionTypeTest
     {
         $data = json_decode($this->getFixtureFileContents('learnosityjsons/longtext_validation.json'), true);
         $assessmentItemArray = $this->convertToAssessmentItem($data);
-
+        
         foreach($assessmentItemArray as $assessmentItem){
             
             // Longtext shall have no <responseDeclaration> and <responseProcessing>
