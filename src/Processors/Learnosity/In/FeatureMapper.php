@@ -16,6 +16,6 @@ class FeatureMapper
         $featureTypeClassName = 'LearnosityQti\Entities\QuestionTypes\\' . $featureJson['data']['type'];
         /** @var BaseQuestionType $questionType */
         $featureType = EntityBuilder::build($featureTypeClassName, $featureJson['data']);
-        return new Feature($featureJson['data']['type'], $featureJson['reference'], $featureType);
+        return new Feature($featureJson['data']['type'], $featureJson['reference'], $featureType, $featureJson['content']);
     }
 }

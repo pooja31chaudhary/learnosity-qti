@@ -25,9 +25,9 @@ class FeatureWriter
                 "Replaced it with randomly generated `$featureIdentifier`"
             );
         }
-
+        $content = $feature->get_content();
         $builder = new AssessmentItemBuilder();
-        $assessmentItem = $builder->buildFeature($featureIdentifier, '', [$feature]);
+        $assessmentItem = $builder->buildFeature($featureIdentifier, '', [$feature], $content);
         $xml = new XmlDocument();
         $xml->setDocumentComponent($assessmentItem);
 

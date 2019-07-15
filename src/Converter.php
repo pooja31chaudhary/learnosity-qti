@@ -293,7 +293,6 @@ class Converter
 
     private static function convertLearnosityFeature(array $featureJson)
     {
-        
         $preprocessingService = new LearnosityToQtiPreProcessingService($featureJson);
         $featureMapper = new FeatureMapper();
         $featureWriter = new FeatureWriter();

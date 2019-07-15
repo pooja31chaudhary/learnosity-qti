@@ -91,6 +91,11 @@ class ConvertToQtiService
         return $this->inputPath;
     }
 
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
     public function process()
     {
         $errors = $this->validate();
@@ -226,6 +231,7 @@ class ConvertToQtiService
         if (is_array($features) && sizeof($features) > 0) {
             $this->createSharedPassageFolder($this->outputPath . '/' . $this->rawPath);
         }
+        
         if (!empty($json['questions'])) {
             foreach ($json['questions'] as $question) {
                 $question['content'] = $content;
@@ -245,6 +251,7 @@ class ConvertToQtiService
                 }
             }
         }
+
         if (!empty($json['features']) && empty($json['questions'])) {
             foreach ($json['features'] as $feature) {
                 $feature['content'] = $content;

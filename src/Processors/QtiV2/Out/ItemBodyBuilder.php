@@ -2,6 +2,7 @@
 
 namespace LearnosityQti\Processors\QtiV2\Out;
 
+use LearnosityQti\Services\ConvertToQtiService;
 use LearnosityQti\Services\LogService;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use LearnosityQti\Utils\SimpleHtmlDom\SimpleHtmlDom;
@@ -88,7 +89,12 @@ class ItemBodyBuilder
 
         $content = $this->removeUnusedSpanFromContent($interactions, $content);
         $content = strip_tags($content, "<span><div>");
+
+        $learnosityService = ConvertToQtiService::getInstance();
+        $format = $learnosityService->getFormat();
+        
         $contentCollection = QtiMarshallerUtil::unmarshallElement($content);
+
         $wrapperCollection = new FlowCollection();
         foreach ($contentCollection as $component) {
             $wrapperCollection->attach($component);
@@ -104,11 +110,33 @@ class ItemBodyBuilder
 
             if ($component instanceof Span && StringUtil::contains($component->getClass(), 'learnosity-feature')) {
                 $currentContainer = $iterator->getCurrentContainer();
-                $content = new FlowCollection();
-
+                $featureReference = trim(str_replace('learnosity-feature', '', $component->getClass()));
+                $featureReference = trim(str_replace('feature-', '', $featureReference));
+                
                 // Build the media interaction
-                $interaction = $interactions['features']['interaction'];
-                $content->attach($interaction);
+                $interaction = $interactions[$featureReference]['interaction'];
+
+                if ($format == "canvas") {
+                    $interactionContent = new FlowCollection();
+                    $interactionContent->attach($interaction);
+
+                    $divCol = new Div();
+                    $divCol->setClass('col-xs-12');
+                    $divCol->setContent($interactionContent);
+
+                    $divRow = new Div();
+                    $divRow->setClass('row');
+                    $divRowContent = new FlowCollection();
+                    $divRowContent->attach($divCol);
+                    $divRow->setContent($divRowContent);
+
+                    $content = new FlowCollection();
+                    $content->attach($divRow);
+
+                } else {
+                    $content = new FlowCollection();
+                    $content->attach($interaction);
+                }
     
                 $replacement = ContentCollectionBuilder::buildContent($currentContainer, $content)->current();
                 $currentContainer->getComponents()->replace($component, $replacement);
@@ -138,6 +166,7 @@ class ItemBodyBuilder
         
         // Extract the actual content from the div wrapper and add that to our <itemBody>
         $componentsWithinDiv = $divWrapper->getComponents();
+
         $itemBody = new ItemBody();
         $itemBody->setContent(ContentCollectionBuilder::buildBlockCollectionContent($componentsWithinDiv));
         return $itemBody;

@@ -6,6 +6,7 @@ use LearnosityQti\Entities\Feature;
 use LearnosityQti\Entities\Question;
 use LearnosityQti\Exceptions\MappingException;
 use LearnosityQti\Processors\QtiV2\Out\Validation\featureValidationBuilder;
+use LearnosityQti\Services\ConvertToQtiService;
 use LearnosityQti\Utils\MimeUtil;
 use LearnosityQti\Utils\StringUtil;
 use qtism\common\enums\BaseType;
@@ -47,6 +48,9 @@ class AssessmentItemBuilder
         //$assessmentItem->setOutcomeDeclarations($this->buildOutcomeDeclarations());
         $assessmentItem->setToolName('Learnosity');
         
+        $learnosityService = ConvertToQtiService::getInstance();
+        $format = $learnosityService->getFormat();
+
         // Store interactions on this array to later be placed on <itemBody>
         $interactions = [];
         $responseDeclarationCollection = new ResponseDeclarationCollection();
@@ -58,7 +62,7 @@ class AssessmentItemBuilder
             if (!empty($questionData['features']) && in_array($questionData['features'][0]['data']['type'], ['audioplayer', 'videoplayer'])) {
                 list($mediaInteraction, $mediaResponseDeclaration) = $this->buildMediaInteraction($questionData);
                 if (isset($mediaInteraction)) {
-                    $interactions['features']['interaction'] = $mediaInteraction;
+                    $interactions[$questionData['features'][0]['reference']]['interaction'] = $mediaInteraction;
                 }
             }
  
@@ -105,7 +109,7 @@ class AssessmentItemBuilder
                     $responseDeclarationCollection->attach($responseDeclaration);
                 }
 
-                if (isset($mediaResponseDeclaration)) {
+                if (isset($mediaResponseDeclaration) && $format != 'canvas') {
                     $responseDeclarationCollection->attach($mediaResponseDeclaration);
                 }
             }
@@ -169,7 +173,7 @@ class AssessmentItemBuilder
         return $result;
     }
 
-    public function buildFeature($itemIdentifier, $itemLabel, array $features, $content = '')
+    public function buildFeature($itemIdentifier, $itemLabel, array $features, $content)
     {
        
         // Initialise our <assessmentItem>
@@ -180,7 +184,6 @@ class AssessmentItemBuilder
         // Store interactions on this array to later be placed on <itemBody>
         $interactions = [];
         $responseDeclarationCollection = new ResponseDeclarationCollection();
-        $responseProcessingTemplates = [];
         
         foreach ($features as $feature) {
             $featureData = $feature->to_array();
@@ -189,7 +192,7 @@ class AssessmentItemBuilder
             $assessmentItem->setOutcomeDeclarations($this->buildScoreOutcomeDeclarations(0, 'SCORE'));
             
             // Map the `features` to be placed at <itemBody>
-            list($interaction, $responseDeclaration, $responseProcessing) = $this->mapFeature($feature);
+            list($interaction, $responseDeclaration) = $this->mapFeature($feature);
             if (!empty($responseDeclaration)) {
                 $responseDeclarationCollection->attach($responseDeclaration);
             }
