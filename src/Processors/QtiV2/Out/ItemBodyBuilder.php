@@ -88,8 +88,7 @@ class ItemBodyBuilder
         // TODO: to avoid QtiComponentIterator bug ignoring 2nd element with empty content
 
         $content = $this->removeUnusedSpanFromContent($interactions, $content);
-        $content = strip_tags($content, "<span><div>");
-
+        $content = strip_tags($content, "<span><div><object>");
         $learnosityService = ConvertToQtiService::getInstance();
         $format = $learnosityService->getFormat();
         

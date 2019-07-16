@@ -55,7 +55,6 @@ class LearnosityToQtiPreProcessingService
                 LogService::log($e->getMessage() . '. Ignoring mapping feature ' . $node->outertext . '`');
             }
         }
-
         return $html->save();
     }
 
@@ -74,19 +73,18 @@ class LearnosityToQtiPreProcessingService
             $featureReference = $this->getFeatureReferenceFromClassName($nodeClassAttribute);
             if (isset($this->widgets[$featureReference])) {
                 $feature = $this->widgets[$featureReference];
-                $type = $feature['data']['type'];
-                $src = $feature['data']['src'];
+                $type = isset($feature['data']['type']) ? $feature['data']['type'] : '';
+                $src = isset($feature['data']['src']) ? $feature['data']['src'] : '';
             } else {
                 $feature = $this->widgets;
-                $type = $feature[1]['type'];
-                $src = $feature[1]['src'];
+                $type = isset($feature[1]['type']) ? $feature[1]['type'] : '';
+                $src = isset($feature[1]['src']) ? $feature[1]['src'] : '';
             }
             if ($type === 'audioplayer' || $type === 'videoplayer') {
                 $object = new ObjectElement($src, MimeUtil::guessMimeType(basename($src)));
                 $object->setLabel($featureReference);
                 //return QtiMarshallerUtil::marshallValidQti($object);
             } elseif ($type === 'sharedpassage') {
-
                 $flowCollection = new FlowCollection();
                 $div = $this->createDivForSharedPassage();
                 $object = new ObjectElement('sharedpassage/' . $featureReference . '.html', 'text/html');
