@@ -266,16 +266,16 @@ class Converter
         
         // Handle `item` which contains both a single item and one or more questions/features
         if ($jsonType === self::LEARNOSITY_DATA_ITEM) {
-            list($xmlString, $messages, $featureHtml) = self::convertLearnosityItem($data);
+            list($xmlString, $messages, $questionReference, $featureHtml) = self::convertLearnosityItem($data);
         // Handle if feature
         } elseif ($jsonType === self::LEARNOSITY_DATA_FEATURE) {
-            list($xmlString, $messages, $featureHtml) = self::convertLearnosityFeature($data);
+            list($xmlString, $messages, $questionReference, $featureHtml) = self::convertLearnosityFeature($data);
         // Handle if just question
         } elseif ($jsonType === self::LEARNOSITY_DATA_QUESTION) {
-            list($xmlString, $messages, $featureHtml) = self::convertLearnosityQuestion($data);
+            list($xmlString, $messages, $questionReference, $featureHtml) = self::convertLearnosityQuestion($data);
         // Handle if just question data
         } elseif ($jsonType === self::LEARNOSITY_DATA_QUESTION_DATA) {
-            list($xmlString, $messages, $featureHtml) = self::convertLearnosityQuestionData($data);
+            list($xmlString, $messages, $questionReference, $featureHtml) = self::convertLearnosityQuestionData($data);
         } else {
             throw new \Exception('Unknown JSON format');
         }
@@ -288,7 +288,7 @@ class Converter
             LogService::log('Unknown error occurred. The QTI XML produced may not be valid');
         }
 
-        return [$xmlString, $messages, $featureHtml];
+        return [$xmlString, $messages, $questionReference, $featureHtml];
     }
 
     private static function convertLearnosityFeature(array $featureJson)

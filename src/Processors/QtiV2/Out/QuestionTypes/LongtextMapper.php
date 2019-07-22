@@ -19,7 +19,7 @@ class LongtextMapper extends AbstractQuestionTypeMapper
         $metadata = $question->get_metadata();
         $feedbackOptions = [];
         
-        if(isset($metadata) && !empty($metadata->get_distractor_rationale())){
+        if (isset($metadata) && !empty($metadata->get_distractor_rationale())) {
             $feedbackOptions['genral_feedback'] = $metadata->get_distractor_rationale();
         }
         
@@ -29,21 +29,17 @@ class LongtextMapper extends AbstractQuestionTypeMapper
         $interaction->setFormat(TextFormat::XHTML);
         $interaction->setMinStrings(1);
         $interaction->setMaxStrings(1);
-        if(isset($questionData['max_length'])){
+        if (isset($questionData['max_length'])) {
             $interaction->setExpectedLength($questionData['max_length']);
         }
 
         $placeholderText = $question->get_placeholder();
-        if(!empty($placeholderText)) {
+        if (!empty($placeholderText)) {
             $interaction->setPlaceholderText($placeholderText);
         }
 
         $builder = new LongtextValidationBuilder();
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(),$feedbackOptions);
-        }else{
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation());
-        }
+        list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions);
         
         return [$interaction, $responseDeclaration, $responseProcessing];
     }

@@ -13,13 +13,13 @@ class PlaintextMapper extends AbstractQuestionTypeMapper
     public function convert(BaseQuestionType $questionType, $interactionIdentifier, $interactionLabel)
     {
         /** @var plaintext $question */
-        $question = $questionType; 
+        $question = $questionType;
         $questionData = $question->to_array();
      
         $metadata = $question->get_metadata();
         $feedbackOptions = [];
         
-        if(isset($metadata) && !empty($metadata->get_distractor_rationale())){
+        if (isset($metadata) && !empty($metadata->get_distractor_rationale())) {
             $feedbackOptions['genral_feedback'] = $metadata->get_distractor_rationale();
         }
         
@@ -28,10 +28,10 @@ class PlaintextMapper extends AbstractQuestionTypeMapper
         $interaction->setPrompt($this->convertStimulusForPrompt($question->get_stimulus()));
         $interaction->setFormat(TextFormat::PLAIN);
         $interaction->setMinStrings(1);
-        if(isset($questionData['max_length'])){
+        if (isset($questionData['max_length'])) {
             $interaction->setExpectedLength($questionData['max_length']);
             $interaction->setMaxStrings($questionData['max_length']);
-        }else{
+        } else {
             $interaction->setMaxStrings(1);
         }
 
@@ -41,11 +41,7 @@ class PlaintextMapper extends AbstractQuestionTypeMapper
         }
 
         $builder = new PlaintextValidationBuilder();
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(),$feedbackOptions);
-        }else{
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation());
-        }
+        list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions);
         
         return [$interaction, $responseDeclaration, $responseProcessing];
     }

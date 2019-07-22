@@ -66,9 +66,17 @@ class ItemBodyBuilder
         $class = 'learnosity-response';
         $featureClass = 'learnosity-feature';
         $spanTag = $xpath->query("//span[contains(@class,'$class')]");
+        $featureSpanTag = $xpath->query("//span[contains(@class,'$featureClass')]");
         foreach ($spanTag as $span) {
             $questionReference = trim(str_replace('learnosity-response question-', '', $span->getAttribute('class')));
             if (!isset($interactions[$questionReference])) {
+                $span->parentNode->removeChild($span);
+            }
+        }
+
+        foreach ($featureSpanTag as $span) {
+            $featureReference = trim(str_replace('learnosity-feature feature-', '', $span->getAttribute('class')));
+            if (!isset($interactions[$featureReference])) {
                 $span->parentNode->removeChild($span);
             }
         }

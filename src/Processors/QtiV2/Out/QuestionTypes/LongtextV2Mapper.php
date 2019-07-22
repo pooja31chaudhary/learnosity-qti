@@ -19,7 +19,7 @@ class LongtextV2Mapper extends AbstractQuestionTypeMapper
         $metadata = $question->get_metadata();
         $feedbackOptions = [];
         
-        if(isset($metadata) && !empty($metadata->get_distractor_rationale())){
+        if (isset($metadata) && !empty($metadata->get_distractor_rationale())) {
             $feedbackOptions['genral_feedback'] = $metadata->get_distractor_rationale();
         }
         
@@ -29,7 +29,7 @@ class LongtextV2Mapper extends AbstractQuestionTypeMapper
         $interaction->setFormat(TextFormat::XHTML);
         $interaction->setMinStrings(1);
         $interaction->setMaxStrings(1);
-        if(isset($questionData['max_length'])){
+        if (isset($questionData['max_length'])) {
             $interaction->setExpectedLength($questionData['max_length']);
         }
         $placeholderText = $question->get_placeholder();
@@ -38,13 +38,8 @@ class LongtextV2Mapper extends AbstractQuestionTypeMapper
         }
 
         $builder = new LongtextValidationBuilder();
+        list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions);
         
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(),$feedbackOptions);
-        }else{
-            list($responseDeclaration,$responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation());
-        }
-        
-        return [$interaction, $responseDeclaration, $responseProcessing];
+        return [$interaction, $responseDeclaration];
     }
 }

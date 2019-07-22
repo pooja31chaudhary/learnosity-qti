@@ -48,6 +48,6 @@ class QuestionWriter
         }
         // Flush out all the error messages stored in this static class, also ensure they are unique
         $messages = array_values(array_unique(LogService::flush()));
-        return [$xml->saveToString(true), $messages, $featureBuilderArray];
+        return [$xml->saveToString(true), $messages, $questionReference, $featureBuilderArray];
     }
 }
