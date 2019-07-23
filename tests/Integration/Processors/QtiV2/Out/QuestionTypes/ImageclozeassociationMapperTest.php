@@ -14,86 +14,90 @@ use qtism\common\enums\Cardinality;
 use qtism\data\content\interactions\GapImg;
 use qtism\data\content\interactions\GraphicGapMatchInteraction;
 use qtism\data\state\ResponseDeclaration;
-use LearnosityQti\Services\ConvertToQtiService;
 use qtism\data\state\Value;
 use ReflectionProperty;
 
-class ImageclozeassociationMapperTest extends \PHPUnit_Framework_TestCase
+class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
 {
     
     public function testSimpleCommonCase()
     {
-        $question = $this->buildSimpleImageClozeassociationQuestion();
-        $imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
-        $mock = $this->getMock('ConvertToQtiService', array('getInputPath'));
+		$data = json_decode($this->getFixtureFileContents('learnosityjsons/data_imageclozeassociation.json'), true);
+        $assessmentItemArray = $this->convertToAssessmentItem($data);
         
-        // Replace protected self reference with mock object
-        
-		$ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
-		$ref->setAccessible(true);
-		$ref->setValue(null, $mock);
-        
-        $path = $mock->expects($this->once())
-            ->method('getInputPath')
-            ->will($this->returnValue($imagePath));
-        
+		foreach ($assessmentItemArray as $assessmentItem) {
+			$imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
+			$mock = $this->getMock('ConvertToQtiService', array('getInputPath','getFormat'));
 
-        /** @var graphicGapMatchInteraction $interaction */
-        $mapper = new ImageclozeassociationMapper();
-        //$mapper->attach($mock);
-        list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert($question, 'testIdentifier', 'testIdentifier');
-        
-        /** @var GraphicGapMatchInteraction $interaction */
-        $interaction = $assessmentItem->getComponentsByClassName('graphicGapMatchInteraction', true)->getArrayCopy()[0];
-        $this->assertTrue($interaction instanceof GraphicGapMatchInteraction);
+			// Replace protected self reference with mock object
+            $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+			$ref->setAccessible(true);
+			$ref->setValue(null, $mock);
 
-        // And its prompt is mapped correctly
-        $promptString = QtiMarshallerUtil::marshallCollection($interaction->getPrompt()->getComponents());
-        $this->assertEquals('Imagecloze association question', $promptString);
+			$path = $mock->expects($this->once())
+				->method('getInputPath')
+				->will($this->returnValue($imagePath));
+			
+			$format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
 
-       
-        // And its gapimages mapped well
-        /** @var GapImg[] $gapImages */
-        $gapImages = $interaction->getGapImgs()->getArrayCopy();
-        $this->assertEquals(3, count($gapImages));
+            /** @var graphicGapMatchInteraction $interaction */
+			$mapper = new ImageclozeassociationMapper();
+			//$mapper->attach($mock);
+			list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert($question, 'testIdentifier', 'testIdentifier');
 
-        $this->assertEquals('CHOICE_0', $gapImages[0]->getIdentifier());
-        $object0 = $gapImages[0]->getComponents()->current();
-        $this->assertEquals('image/png', $object0->getType());
-        $this->assertEquals(56, $object0->getWidth());
-        $this->assertEquals(13, $object0->getHeight());
+			/** @var GraphicGapMatchInteraction $interaction */
+			$interaction = $assessmentItem->getComponentsByClassName('graphicGapMatchInteraction', true)->getArrayCopy()[0];
+			$this->assertTrue($interaction instanceof GraphicGapMatchInteraction);
 
-        $this->assertEquals('CHOICE_1', $gapImages[1]->getIdentifier());
-        $object1 = $gapImages[1]->getComponents()->current();
-        $this->assertEquals('image/png', $object1->getType());
-        $this->assertEquals(56, $object1->getWidth());
-        $this->assertEquals(13, $object1->getHeight());
+			// And its prompt is mapped correctly
+			$promptString = QtiMarshallerUtil::marshallCollection($interaction->getPrompt()->getComponents());
+			$this->assertEquals('Imagecloze association question', $promptString);
 
-        $this->assertEquals('CHOICE_2', $gapImages[2]->getIdentifier());
-        $object2 = $gapImages[2]->getComponents()->current();
-        $this->assertEquals('image/png', $object2->getType());
-        $this->assertEquals(100, $object2->getWidth());
-        $this->assertEquals(100, $object2->getHeight());
+            // And its gapimages mapped well
+			/** @var GapImg[] $gapImages */
+			$gapImages = $interaction->getGapImgs()->getArrayCopy();
+			$this->assertEquals(3, count($gapImages));
+ 
+			$this->assertEquals('CHOICE_0', $gapImages[0]->getIdentifier());
+			$object0 = $gapImages[0]->getComponents()->current();
+			$this->assertEquals('image/png', $object0->getType());
+			$this->assertEquals(56, $object0->getWidth());
+			$this->assertEquals(13, $object0->getHeight());
 
-        // And its associableHotspot
-        // TODO: Do more through assert with coords and matchmax/matchmin check
-        $this->assertEquals(3, $interaction->getAssociableHotspots()->count());
+			$this->assertEquals('CHOICE_1', $gapImages[1]->getIdentifier());
+			$object1 = $gapImages[1]->getComponents()->current();
+			$this->assertEquals('image/png', $object1->getType());
+			$this->assertEquals(56, $object1->getWidth());
+			$this->assertEquals(13, $object1->getHeight());
 
-        // And its response processing and response declaration
-        $this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT, $assessmentItem->getResponseProcessing()->getTemplate());
-        /** @var ResponseDeclaration $responseDeclaration */
-        $responseDeclaration = $assessmentItem->getResponseDeclarations()->getArrayCopy()[0];
-        $this->assertEquals(Cardinality::MULTIPLE, $responseDeclaration->getCardinality());
-        $this->assertEquals(BaseType::DIRECTED_PAIR, $responseDeclaration->getBaseType());
+			$this->assertEquals('CHOICE_2', $gapImages[2]->getIdentifier());
+			$object2 = $gapImages[2]->getComponents()->current();
+			$this->assertEquals('image/png', $object2->getType());
+			$this->assertEquals(100, $object2->getWidth());
+			$this->assertEquals(100, $object2->getHeight());
 
-        /** @var Value[] $values */
-        $values = $responseDeclaration->getCorrectResponse()->getValues()->getArrayCopy(true);
-        $this->assertDirectPair($values[0]->getValue(), 'ASSOCIABLEHOTSPOT_0', 'CHOICE_2');
-        $this->assertDirectPair($values[1]->getValue(), 'ASSOCIABLEHOTSPOT_1', 'CHOICE_1');
-        $this->assertDirectPair($values[2]->getValue(), 'ASSOCIABLEHOTSPOT_2', 'CHOICE_0');
+			// And its associableHotspot
+			// TODO: Do more through assert with coords and matchmax/matchmin check
+			$this->assertEquals(3, $interaction->getAssociableHotspots()->count());
 
-        // And, we don't have mapping because we simply won't
-        $this->assertEquals(null, $responseDeclaration->getMapping());
+			// And its response processing and response declaration
+			$this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT, $assessmentItem->getResponseProcessing()->getTemplate());
+			/** @var ResponseDeclaration $responseDeclaration */
+			$responseDeclaration = $assessmentItem->getResponseDeclarations()->getArrayCopy()[0];
+			$this->assertEquals(Cardinality::MULTIPLE, $responseDeclaration->getCardinality());
+			$this->assertEquals(BaseType::DIRECTED_PAIR, $responseDeclaration->getBaseType());
+
+			/** @var Value[] $values */
+			$values = $responseDeclaration->getCorrectResponse()->getValues()->getArrayCopy(true);
+			$this->assertDirectPair($values[0]->getValue(), 'ASSOCIABLEHOTSPOT_0', 'CHOICE_2');
+			$this->assertDirectPair($values[1]->getValue(), 'ASSOCIABLEHOTSPOT_1', 'CHOICE_1');
+			$this->assertDirectPair($values[2]->getValue(), 'ASSOCIABLEHOTSPOT_2', 'CHOICE_0');
+
+			// And, we don't have mapping because we simply won't
+			$this->assertEquals(null, $responseDeclaration->getMapping());
+		}
     }
 
     private function assertDirectPair(QtiDirectedPair $pair, $expectedFirstValue, $expectedSecondValue)
@@ -120,6 +124,7 @@ class ImageclozeassociationMapperTest extends \PHPUnit_Framework_TestCase
         $question = new imageclozeassociation('imageclozeassociation', $imageObj, $response_positions, $possible_responses);
         $question->set_stimulus('Imagecloze association question');
         $question->set_response_container($response_container);
+
         return $question;
     }
 }
