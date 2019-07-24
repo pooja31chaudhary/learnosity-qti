@@ -22,26 +22,32 @@ class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
     
     public function testSimpleCommonCase()
     {
+		$imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
 		$data = json_decode($this->getFixtureFileContents('learnosityjsons/data_imageclozeassociation.json'), true);
-        $assessmentItemArray = $this->convertToAssessmentItem($data);
         
-		foreach ($assessmentItemArray as $assessmentItem) {
-			$imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
-			$mock = $this->getMock('ConvertToQtiService', array('getInputPath','getFormat'));
+        $mock = $this->getMock('ConvertToQtiService', array('getInputPath','getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
 
-			// Replace protected self reference with mock object
-            $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
-			$ref->setAccessible(true);
-			$ref->setValue(null, $mock);
-
-			$path = $mock->expects($this->once())
+	    $path = $mock->expects($this->once())
 				->method('getInputPath')
 				->will($this->returnValue($imagePath));
 			
-			$format = $mock->expects($this->once())
-				->method('getFormat')
-				->will($this->returnValue('qti'));
-            print_r($format); die;
+
+			
+        
+        $assessmentItemArray = $this->convertToAssessmentItem($data);
+        
+		foreach ($assessmentItemArray as $assessmentItem) {
+			
+
             /** @var graphicGapMatchInteraction $interaction */
 			$mapper = new ImageclozeassociationMapper();
 			//$mapper->attach($mock);
