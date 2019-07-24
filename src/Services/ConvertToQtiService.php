@@ -221,10 +221,6 @@ class ConvertToQtiService
     private function convertAssessmentItem($json)
     {
         $result = [];
-        if ($this->format=='canvas') {
-            $json['content'] = strip_tags($json['content'], "<span>");
-        }
-
         $finalXml = [];
         $content = $json['content'];
         $features = $json['features'];

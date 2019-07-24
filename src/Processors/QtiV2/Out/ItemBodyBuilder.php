@@ -83,7 +83,7 @@ class ItemBodyBuilder
 
         // remove doctype and html tag
         $dom->removeChild($dom->doctype);
-        $dom->replaceChild($dom->firstChild->firstChild, $dom->firstChild);
+        $dom->replaceChild($dom->firstChild->firstChild->firstChild, $dom->firstChild);
         
         $newHtml = $dom->saveHTML();
         return $newHtml;
@@ -94,12 +94,14 @@ class ItemBodyBuilder
         // Map <itemBody>
         // TODO: Wrap these `content` stuff in a div
         // TODO: to avoid QtiComponentIterator bug ignoring 2nd element with empty content
-
-        $content = $this->removeUnusedSpanFromContent($interactions, $content);
-        $content = strip_tags($content, "<span><div><object>");
-        $learnosityService = ConvertToQtiService::getInstance();
+		
+		$learnosityService = ConvertToQtiService::getInstance();
         $format = $learnosityService->getFormat();
-        
+        $content = $this->removeUnusedSpanFromContent($interactions, $content);
+		if ($format == 'canvas') {
+            $content = strip_tags($content, "<span><object>");
+		}
+       
         $contentCollection = QtiMarshallerUtil::unmarshallElement($content);
 
         $wrapperCollection = new FlowCollection();
