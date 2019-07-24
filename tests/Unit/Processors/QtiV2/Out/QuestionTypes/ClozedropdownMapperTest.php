@@ -72,18 +72,13 @@ class ClozedropdownMapperTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($responseDeclarationThree->getMapping());
         $this->assertEquals('INLINECHOICE_0', $responseDeclarationThree->getCorrectResponse()->getValues()->getArrayCopy()[0]->getValue());
         $this->assertEquals('Color', QtiMarshallerUtil::marshallCollection($interactionThree->getComponentByIdentifier('INLINECHOICE_0')->getComponents()));
-        $this->assertCount(4, $responseProcessing->getComponents());
+        $this->assertCount(1, $responseProcessing->getComponents());
         
         $responseRules = $responseProcessing->getComponents();
         $responseRuleOne = $responseRules[0];
-        $responseRuleTwo = $responseRules[1];
-        $responseRuleThree = $responseRules[2];
-        $responseRuleFour = $responseRules[3];
         
         $this->assertTrue($responseRuleOne instanceof ResponseCondition);
-        $this->assertTrue($responseRuleTwo instanceof ResponseCondition);
-        $this->assertTrue($responseRuleThree instanceof ResponseCondition);
-        $this->assertTrue($responseRuleFour instanceof SetOutcomeValue);
+        
     }
     
     public function testWithDistractorRationale()
@@ -147,22 +142,16 @@ class ClozedropdownMapperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('INLINECHOICE_0', $responseDeclarationThree->getCorrectResponse()->getValues()->getArrayCopy()[0]->getValue());
         $this->assertEquals('Color', QtiMarshallerUtil::marshallCollection($interactionThree->getComponentByIdentifier('INLINECHOICE_0')->getComponents()));
         
-        $this->assertCount(5, $responseProcessing->getComponents());
+        $this->assertCount(2, $responseProcessing->getComponents());
   
         $responseRules = $responseProcessing->getComponents();
         $responseRuleOne = $responseRules[0];
         $responseRuleTwo = $responseRules[1];
-        $responseRuleThree = $responseRules[2];
-        $responseRuleFour = $responseRules[3];
-        $responseRuleFive = $responseRules[4];
         
-        $this->assertTrue($responseRuleOne instanceof ResponseCondition);
-        $this->assertTrue($responseRuleTwo instanceof ResponseCondition);
-        $this->assertTrue($responseRuleThree instanceof ResponseCondition);
-        $this->assertTrue($responseRuleFour instanceof SetOutcomeValue);
-        $this->assertTrue($responseRuleFive instanceof SetOutcomeValue);
+		$this->assertTrue($responseRuleOne instanceof ResponseCondition);
+        $this->assertTrue($responseRuleTwo instanceof SetOutcomeValue);
         
-        $identifier = $responseRuleFive->getIdentifier();
+        $identifier = $responseRuleTwo->getIdentifier();
         $this->assertEquals('FEEDBACK_GENERAL', $identifier);
     }
     

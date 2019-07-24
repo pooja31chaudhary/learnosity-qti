@@ -130,10 +130,10 @@ class ShorttextMapperTest extends \PHPUnit_Framework_TestCase
         $mapper = new ShorttextMapper();
         /** @var TextEntryInteraction $interaction */
         list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert($question, 'reference', 'reference');
-
+        
         /** @var ResponseProcessing $responseProcessing */
         $this->assertNotNull($responseProcessing);
-        $this->assertCount(2, $responseProcessing->getComponents());
+		$this->assertCount(2, $responseProcessing->getComponents());
 
         $responseIf = $responseProcessing->getComponentsByClassName('responseIf', true)->getArrayCopy()[0];
         $this->assertTrue($responseIf instanceof ResponseIf);

@@ -33,7 +33,7 @@ class ClozetextMapperTest extends PHPUnit_Framework_TestCase
         $clozetext = new ClozetextMapper();
         /** @var textEntryInteraction $interaction */
         list($interaction, $responseDeclaration, $responseProcessing) = $clozetext->convert($question, 'testIdentifier', 'testIdentifierLabel');
-        
+
         $interactions = $interaction->getComponentsByClassName('textEntryInteraction', true)->getArrayCopy();
         /** @var TextEntryInteraction $interactionOne */
         $interactionOne = $interactions[0];
@@ -65,7 +65,7 @@ class ClozetextMapperTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('response2', $responseDeclarationTwo->getMapping()->getMapEntries()->getArrayCopy()[0]->getMapKey());
         $this->assertEquals(2.0, $responseDeclarationTwo->getMapping()->getMapEntries()->getArrayCopy()[0]->getMappedValue());
             
-        $this->assertCount(3, $responseProcessing->getComponents());
+        $this->assertCount(1, $responseProcessing->getComponents());
     }
  
     

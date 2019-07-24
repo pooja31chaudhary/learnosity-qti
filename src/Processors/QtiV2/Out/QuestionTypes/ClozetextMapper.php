@@ -3,18 +3,13 @@ namespace LearnosityQti\Processors\QtiV2\Out\QuestionTypes;
 
 use LearnosityQti\Entities\BaseQuestionType;
 use LearnosityQti\Entities\QuestionTypes\clozetext;
-use LearnosityQti\Entities\QuestionTypes\clozetext_metadata;
 use LearnosityQti\Processors\QtiV2\Out\ContentCollectionBuilder;
 use LearnosityQti\Processors\QtiV2\Out\Validation\ClozetextValidationBuilder;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\content\interactions\TextEntryInteraction;
-use qtism\data\content\FlowStaticCollection;
 use qtism\data\content\FlowCollection;
-use qtism\data\content\FeedbackInline;
-use qtism\data\content\InlineCollection;
-use qtism\data\content\TextRun;
 use qtism\data\content\xhtml\text\Div;
-use qtism\data\content\xhtml\text\P;
+
 
 class ClozetextMapper extends AbstractQuestionTypeMapper
 {
@@ -33,7 +28,6 @@ class ClozetextMapper extends AbstractQuestionTypeMapper
         // Check if distractor_rationale_response_level exists
         $feedbackOptions = [];
         $metadata = $question->get_metadata();
-        $feedbackOptions = [];
         if(isset($metadata) && !empty($metadata->get_distractor_rationale())){
             $feedbackOptions['genral_feedback'] = $metadata->get_distractor_rationale();
         }
@@ -75,7 +69,7 @@ class ClozetextMapper extends AbstractQuestionTypeMapper
         // Build validation
         $isCaseSensitive = is_null($question->get_case_sensitive()) ? true : $question->get_case_sensitive();
         $validationBuilder = new ClozetextValidationBuilder($isCaseSensitive);
-        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions, $isCaseSensitive);
+        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(), $isCaseSensitive, $feedbackOptions);
 
         return [$div, $responseDeclaration, $responseProcessing];
     }

@@ -49,7 +49,7 @@ class AssessmentItemBuilder
         $assessmentItem->setToolName('Learnosity');
         
         $learnosityService = ConvertToQtiService::getInstance();
-        $format = $learnosityService->getFormat();
+        //$format = $learnosityService->getFormat();
 
         // Store interactions on this array to later be placed on <itemBody>
         $interactions = [];

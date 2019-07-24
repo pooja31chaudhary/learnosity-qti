@@ -65,7 +65,7 @@ class PlaintextMapperTest extends \PHPUnit_Framework_TestCase
 
         $mapper = new PlaintextMapper();
         /** @var ExtendedTextInteraction $interaction */
-        list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert(
+        list($interaction, $responseDeclaration) = $mapper->convert(
             $question,
             $questionReference,
             $questionReference
@@ -73,25 +73,6 @@ class PlaintextMapperTest extends \PHPUnit_Framework_TestCase
 
         // No validation shall be mapped for plaintext
         $this->assertNotNull($responseDeclaration);
-        $this->assertNotNull($responseProcessing);
-
-        $this->assertCount(2, $responseProcessing->getComponents());
-
-        $responseIf = $responseProcessing->getComponentsByClassName('responseIf', true)->getArrayCopy()[0];
-        $this->assertTrue($responseIf instanceof ResponseIf);
-        $promptIfString = QtiMarshallerUtil::marshallCollection($responseIf->getComponents());
-        $this->assertEquals('<isNull><variable identifier="RESPONSE"/></isNull><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue>', $promptIfString);
-
-        $responseElse = $responseProcessing->getComponentsByClassName('responseElse', true)->getArrayCopy()[0];
-        $this->assertTrue($responseElse instanceof ResponseElse);
-        $promptElseString = QtiMarshallerUtil::marshallCollection($responseElse->getComponents());
-        $this->assertEquals('<responseCondition><responseIf><match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue></responseIf><responseElse><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue></responseElse></responseCondition>', $promptElseString);
-
-        $setoutcome = $responseProcessing->getComponentsByClassName('setOutcomeValue', true)->getArrayCopy()[3];
-        $this->assertTrue($setoutcome instanceof SetOutcomeValue);
-
-        $identifier = $setoutcome->getIdentifier();
-        $this->assertEquals('FEEDBACK_GENERAL', $identifier);
 
         // Assert question mapped correctly to ExtendedTextInteraction
         $this->assertTrue($interaction instanceof ExtendedTextInteraction);

@@ -41,7 +41,7 @@ class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
 			$format = $mock->expects($this->once())
 				->method('getFormat')
 				->will($this->returnValue('qti'));
-
+            print_r($format); die;
             /** @var graphicGapMatchInteraction $interaction */
 			$mapper = new ImageclozeassociationMapper();
 			//$mapper->attach($mock);

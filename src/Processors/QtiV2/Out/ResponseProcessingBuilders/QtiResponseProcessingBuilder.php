@@ -1,5 +1,5 @@
 <?php
-namespace LearnosityQti\Processors\QtiV2\Out\ResponseProcessing;
+namespace LearnosityQti\Processors\QtiV2\Out\ResponseProcessingBuilders;
 
 use qtism\common\enums\BaseType;
 use qtism\data\expressions\BaseValue;
@@ -9,7 +9,6 @@ use qtism\data\expressions\operators\IsNull;
 use qtism\data\expressions\operators\Match;
 use qtism\data\expressions\operators\AndOperator;
 use qtism\data\expressions\operators\Multiple;
-use qtism\data\expressions\operators\Sum;
 use qtism\data\expressions\Variable;
 use qtism\data\processing\ResponseProcessing;
 use qtism\data\rules\ResponseCondition;
@@ -144,6 +143,12 @@ class QtiResponseProcessingBuilder
         // merge response conditions
         $responseCondition = new ResponseCondition($responseIf, null, $responseElse);
         $responseRuleCollection->attach($responseCondition);
+		
+		// generate outcome value if distrator_rationale_value is set
+        if (is_array($feedBackOptions) && !empty($feedBackOptions['genral_feedback'])) {
+            $responseFeedbackComponent = new SetOutcomeValue('FEEDBACK_GENERAL', new BaseValue(BaseType::IDENTIFIER, 'correctOrIncorrect'));
+            $responseRuleCollection->attach($responseFeedbackComponent);
+        }
         
         // set response rules to responseProcessing
         $responseProcessing = new ResponseProcessing();

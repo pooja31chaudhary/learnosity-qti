@@ -13,11 +13,8 @@ use qtism\data\content\interactions\InlineChoiceCollection;
 use qtism\data\content\interactions\InlineChoiceInteraction;
 use qtism\data\content\TextOrVariableCollection;
 use qtism\data\content\FlowCollection;
-use qtism\data\content\FeedbackInline;
-use qtism\data\content\InlineCollection;
 use qtism\data\content\TextRun;
 use qtism\data\content\xhtml\text\Div;
-use qtism\data\content\xhtml\text\P;
 
 class ClozedropdownMapper extends AbstractQuestionTypeMapper
 {
@@ -84,7 +81,8 @@ class ClozedropdownMapper extends AbstractQuestionTypeMapper
         $div->setContent($content);
         // Build validation
         $validationBuilder = new ClozedropdownValidationBuilder($valueIdentifierMapPerInlineChoices);
-        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions);
+		$isCaseSensitive = 1;
+        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(), $isCaseSensitive, $feedbackOptions);
 
         return [$div, $responseDeclaration, $responseProcessing];
     }

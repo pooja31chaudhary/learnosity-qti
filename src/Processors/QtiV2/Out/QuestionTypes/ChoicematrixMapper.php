@@ -6,16 +6,11 @@ use LearnosityQti\Entities\QuestionTypes\choicematrix;
 use LearnosityQti\Processors\QtiV2\Out\ContentCollectionBuilder;
 use LearnosityQti\Processors\QtiV2\Out\Validation\ChoicematrixValidationBuilder;
 use LearnosityQti\Utils\QtiMarshallerUtil;
-use qtism\data\content\FlowCollection;
-use qtism\data\content\FeedbackInline;
-use qtism\data\content\InlineCollection;
 use qtism\data\content\interactions\MatchInteraction;
 use qtism\data\content\interactions\SimpleAssociableChoice;
 use qtism\data\content\interactions\SimpleAssociableChoiceCollection;
 use qtism\data\content\interactions\SimpleMatchSet;
 use qtism\data\content\interactions\SimpleMatchSetCollection;
-use qtism\data\content\TextRun;
-use qtism\data\content\xhtml\text\Div;
 
 class ChoicematrixMapper extends AbstractQuestionTypeMapper
 {

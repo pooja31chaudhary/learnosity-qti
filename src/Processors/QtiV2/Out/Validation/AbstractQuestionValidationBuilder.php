@@ -12,7 +12,7 @@ abstract class AbstractQuestionValidationBuilder
     private $supportedScoringType = ['exactMatch'];
     abstract protected function buildResponseDeclaration($responseIdentifier, $validation);
     
-    public function buildValidation($responseIdentifier, $validation, $feedBackOptions = array(), $isCaseSensitive = true)
+    public function buildValidation($responseIdentifier, $validation, $isCaseSensitive = true, $feedBackOptions = array())
     {
         // Some basic validation on the `validation` object
         if (empty($validation) && empty($feedBackOptions)) {
@@ -61,7 +61,7 @@ abstract class AbstractQuestionValidationBuilder
             $type[] = 'penalty';
             $penalty = $validation->get_penalty();
         }
-        
+     
         if (sizeof($responseIdentifiers)>1) {
             $responseProcessing = QtiResponseProcessingBuilder::buildResponseProcessingWithMultipleResponse($score, $maxscore, $penalty, $feedBackOptions, $type, $responseIdentifiers);
         } else {
