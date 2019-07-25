@@ -104,7 +104,6 @@ class ClozeassociationMapperTest extends AbstractQuestionTypeTest
             $promptIfString = QtiMarshallerUtil::marshallCollection($responseIf->getComponents());
             $this->assertEquals('<isNull><variable identifier="RESPONSE"/></isNull><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue>', $promptIfString);
             
-            
             $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseElse', true));
             $responseElse = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseElse', true)->getArrayCopy()[0];
             $this->assertTrue($responseElse instanceof ResponseElse);

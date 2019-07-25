@@ -10,7 +10,6 @@ use LearnosityQti\Processors\QtiV2\Out\QuestionTypes\TokenhighlightMapper;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\content\interactions\Hottext;
 use qtism\data\content\interactions\HottextInteraction;
-use qtism\data\processing\ResponseProcessing;
 use qtism\data\rules\ResponseIf;
 use qtism\data\rules\ResponseElse;
 use qtism\data\rules\SetOutcomeValue;

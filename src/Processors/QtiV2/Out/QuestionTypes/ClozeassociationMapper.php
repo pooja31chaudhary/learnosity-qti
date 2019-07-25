@@ -61,14 +61,9 @@ class ClozeassociationMapper extends AbstractQuestionTypeMapper
         $interaction->setShuffle($question->get_shuffle_options() ? true : false);
 
         $validationBuilder = new ClozeassociationValidationBuilder($possibleResponses);
+        $isCaseSensitive = 1;
+        list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(), $isCaseSensitive, $feedbackOptions);
         
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(),$feedbackOptions);
-        }else{
-            list($responseDeclaration, $responseProcessing) = $validationBuilder->buildValidation($interactionIdentifier, $question->get_validation(),[]);
-        }
-        
-
         return [$interaction, $responseDeclaration, $responseProcessing];
     }
 }

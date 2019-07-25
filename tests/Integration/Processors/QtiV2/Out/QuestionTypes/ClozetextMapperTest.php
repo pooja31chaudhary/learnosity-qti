@@ -2,6 +2,7 @@
 
 namespace LearnosityQti\Tests\Integration\Processors\QtiV2\Out\QuestionTypes;
 
+use LearnosityQti\Processors\QtiV2\Out\Constants;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\TextEntryInteraction;
@@ -62,9 +63,6 @@ class ClozetextMapperTest extends AbstractQuestionTypeTest
             $this->assertEquals(2.0, $responseDeclarationTwo->getMapping()->getMapEntries()->getArrayCopy()[0]->getMappedValue());
             
             $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponents()); 
-            // Assert response processing template
-            //$this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE, $assessmentItem->getResponseProcessing()->getTemplate());
-    
             
         }
     }

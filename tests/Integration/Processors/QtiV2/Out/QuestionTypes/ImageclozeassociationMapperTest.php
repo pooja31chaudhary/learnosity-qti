@@ -43,7 +43,6 @@ class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
         $assessmentItemArray = $this->convertToAssessmentItem($data);
         foreach ($assessmentItemArray as $assessmentItem) {
 			
-
             /** @var graphicGapMatchInteraction $interaction */
 			$mapper = new ImageclozeassociationMapper();
 			//$mapper->attach($mock);
