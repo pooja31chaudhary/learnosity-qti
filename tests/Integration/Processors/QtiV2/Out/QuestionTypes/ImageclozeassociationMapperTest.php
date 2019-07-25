@@ -40,12 +40,8 @@ class ImageclozeassociationMapperTest extends AbstractQuestionTypeTest
 				->method('getInputPath')
 				->will($this->returnValue($imagePath));
 			
-
-			
-        
         $assessmentItemArray = $this->convertToAssessmentItem($data);
-        
-		foreach ($assessmentItemArray as $assessmentItem) {
+        foreach ($assessmentItemArray as $assessmentItem) {
 			
 
             /** @var graphicGapMatchInteraction $interaction */

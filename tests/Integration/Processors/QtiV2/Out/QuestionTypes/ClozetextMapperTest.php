@@ -2,11 +2,11 @@
 
 namespace LearnosityQti\Tests\Integration\Processors\QtiV2\Out\QuestionTypes;
 
-use LearnosityQti\Processors\QtiV2\Out\Constants;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\TextEntryInteraction;
 use qtism\data\state\ResponseDeclaration;
+use ReflectionProperty;
 
 class ClozetextMapperTest extends AbstractQuestionTypeTest
 {
@@ -14,7 +14,18 @@ class ClozetextMapperTest extends AbstractQuestionTypeTest
     {
         /** @var AssessmentItem $assessmentItem */
         $question = json_decode($this->getFixtureFileContents('learnosityjsons/data_clozetext.json'), true);
-        $assessmentItemArray = $this->convertToAssessmentItem($question);
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+		
+		$assessmentItemArray = $this->convertToAssessmentItem($question);
         foreach ($assessmentItemArray as $assessmentItem) {
             $interactions = $assessmentItem->getComponentsByClassName('textEntryInteraction', true)->getArrayCopy();
             /** @var TextEntryInteraction $interactionOne */
@@ -50,7 +61,7 @@ class ClozetextMapperTest extends AbstractQuestionTypeTest
             $this->assertEquals('response2', $responseDeclarationTwo->getMapping()->getMapEntries()->getArrayCopy()[0]->getMapKey());
             $this->assertEquals(2.0, $responseDeclarationTwo->getMapping()->getMapEntries()->getArrayCopy()[0]->getMappedValue());
             
-            $this->assertCount(3, $assessmentItem->getResponseProcessing()->getComponents()); 
+            $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponents()); 
             // Assert response processing template
             //$this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MAP_RESPONSE, $assessmentItem->getResponseProcessing()->getTemplate());
     

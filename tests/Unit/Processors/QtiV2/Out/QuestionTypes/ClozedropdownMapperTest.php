@@ -34,7 +34,7 @@ class ClozedropdownMapperTest extends \PHPUnit_Framework_TestCase
         $question->set_validation($validation);
         
         $clozedropdown  = new ClozedropdownMapper();
-        /** @var textEntryInteraction $interaction */
+        /** @var InlineChoiceInteraction $interaction */
         list($interaction, $responseDeclaration, $responseProcessing) = $clozedropdown->convert($question, 'testIdentifier', 'testIdentifierLabel');
         
         $interactions = $interaction->getComponentsByClassName('inlineChoiceInteraction', true)->getArrayCopy();

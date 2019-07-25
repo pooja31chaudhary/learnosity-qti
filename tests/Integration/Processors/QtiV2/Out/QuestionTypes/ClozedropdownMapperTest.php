@@ -2,14 +2,13 @@
 
 namespace LearnosityQti\Tests\Integration\Processors\QtiV2\Out\QuestionTypes;
 
-use LearnosityQti\Processors\QtiV2\Out\Constants;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\InlineChoiceInteraction;
 use qtism\data\rules\ResponseCondition;
 use qtism\data\rules\SetOutcomeValue;
 use qtism\data\state\ResponseDeclaration;
-
+use ReflectionProperty;
 
 class ClozedropdownMapperTest extends AbstractQuestionTypeTest
 {
@@ -17,7 +16,18 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
     {
         /** @var AssessmentItem $assessmentItem */
         $question = json_decode($this->getFixtureFileContents('learnosityjsons/data_clozedropdown.json'), true);
-        $assessmentItemArray = $this->convertToAssessmentItem($question);
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+		
+		$assessmentItemArray = $this->convertToAssessmentItem($question);
         foreach ($assessmentItemArray as $assessmentItem) {
             
             $interactions = $assessmentItem->getComponentsByClassName('inlineChoiceInteraction', true)->getArrayCopy();
@@ -35,7 +45,7 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
             $this->assertNotEmpty($content);
 
             // Assert response processing template
-            $this->assertCount(4, $assessmentItem->getResponseProcessing()->getComponents());
+            $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponents());
 
             // Assert response declarations
             $responseDeclarations = $assessmentItem->getResponseDeclarations()->getArrayCopy();
@@ -62,21 +72,17 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
             $this->assertEquals('INLINECHOICE_0', $responseDeclarationThree->getCorrectResponse()->getValues()->getArrayCopy()[0]->getValue());
             $this->assertEquals('Color', QtiMarshallerUtil::marshallCollection($interactionThree->getComponentByIdentifier('INLINECHOICE_0')->getComponents()));
     
-            $this->assertCount(4, $assessmentItem->getResponseProcessing()->getComponents()); 
+            $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponents()); 
             
             // check count of responseProcessing object
             $responseRules = $assessmentItem->getResponseProcessing()->getComponents();
             $responseRuleOne = $responseRules[0];
             $responseRuleTwo = $responseRules[1];
-            $responseRuleThree = $responseRules[2];
-            $responseRuleFour = $responseRules[3];
             
             // check assert for responseProcessing 
             $this->assertTrue($responseRuleOne instanceof ResponseCondition);
-            $this->assertTrue($responseRuleTwo instanceof ResponseCondition);
-            $this->assertTrue($responseRuleThree instanceof ResponseCondition);
-            $this->assertTrue($responseRuleFour instanceof SetOutcomeValue);
-            
+            $this->assertTrue($responseRuleTwo instanceof SetOutcomeValue);
+           
         }
     }
 }

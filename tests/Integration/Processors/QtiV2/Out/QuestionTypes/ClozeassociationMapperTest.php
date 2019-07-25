@@ -15,6 +15,7 @@ use qtism\data\rules\ResponseElse;
 use qtism\data\rules\ResponseIf;
 use qtism\data\content\ModalFeedbackCollection;
 use qtism\data\content\ModalFeedback;
+use ReflectionProperty;
 
 class ClozeassociationMapperTest extends AbstractQuestionTypeTest
 {
@@ -22,7 +23,18 @@ class ClozeassociationMapperTest extends AbstractQuestionTypeTest
     {
         /** @var AssessmentItem $assessmentItem */
         $question = json_decode($this->getFixtureFileContents('learnosityjsons/data_clozeassociation.json'), true);
-        $assessmentItemArray = $this->convertToAssessmentItem($question);
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+
+	    $assessmentItemArray = $this->convertToAssessmentItem($question);
         /** @var GapMatchInteraction $interaction */
         foreach ($assessmentItemArray as $assessmentItem) {
             $interaction = $assessmentItem->getComponentsByClassName('gapMatchInteraction', true)->getArrayCopy()[0];
@@ -68,16 +80,24 @@ class ClozeassociationMapperTest extends AbstractQuestionTypeTest
     public function testWithValidationAndDistractorRationale()
     {
         $data = json_decode($this->getFixtureFileContents('learnosityjsons/data_clozeassociation.json'), true);
-        $assessmentItemArray = $this->convertToAssessmentItem($data);
-
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+		
+		$assessmentItemArray = $this->convertToAssessmentItem($data);
         foreach($assessmentItemArray as $assessmentItem){
 
             $this->assertEquals(1, $assessmentItem->getResponseDeclarations()->count());
             $this->assertNotNull($assessmentItem->getResponseProcessing());
-
-            $this->assertCount(2,$assessmentItem->getResponseProcessing()->getComponents());
-
             
+            $this->assertCount(2,$assessmentItem->getResponseProcessing()->getComponents());
             $this->assertCount(2, $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseIf', true));
             $responseIf = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseIf', true)->getArrayCopy()[0];
             $this->assertTrue($responseIf instanceof ResponseIf);
@@ -98,7 +118,6 @@ class ClozeassociationMapperTest extends AbstractQuestionTypeTest
                 $promptFeedbackString = $modalFeedback->getComponents()[0]->getContent();
                 $this->assertEquals('This is overall feedback', $promptFeedbackString);
             }
-            
         }
     }
 
