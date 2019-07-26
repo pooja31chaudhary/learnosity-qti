@@ -7,10 +7,22 @@ use LearnosityQti\Tests\AbstractTest;
 use qtism\data\AssessmentItem;
 use qtism\data\storage\xml\XmlDocument;
 use LearnosityQti\Processors\QtiV2\Out\Constants as LearnosityExportConstant;
+use ReflectionProperty;
 
 abstract class AbstractQuestionTypeTest extends AbstractTest {
-
+   
     protected function convertToAssessmentItem(array $data) {
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+            
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+        
         $content = $data['content'];
         $features = $data['features'];
         $assessmentItemArray = array();

@@ -20,16 +20,7 @@ class TokenhighlightMapperTest extends AbstractQuestionTypeTest
     public function testSimpleCase()
     {
         $data = json_decode($this->getFixtureFileContents('learnosityjsons/tokenhighlight.json'), true);
-        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
-            
-	    // Replace protected self reference with mock object
-        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
-	    $ref->setAccessible(true);
-	    $ref->setValue(null, $mock);
-            
-        $format = $mock->expects($this->once())
-				->method('getFormat')
-				->will($this->returnValue('qti'));
+        
 
 	    $assessmentItemArray = $this->convertToAssessmentItem($data);
         /** @var GapMatchInteraction $interaction */
@@ -78,16 +69,7 @@ class TokenhighlightMapperTest extends AbstractQuestionTypeTest
 	public function testWithDistractorRationale()
     {
         $data = json_decode($this->getFixtureFileContents('learnosityjsons/token_highlight_metadata.json'), true);
-        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
-            
-	    // Replace protected self reference with mock object
-        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
-	    $ref->setAccessible(true);
-	    $ref->setValue(null, $mock);
-            
-        $format = $mock->expects($this->once())
-				->method('getFormat')
-				->will($this->returnValue('qti'));
+        
 
 	    $assessmentItemArray = $this->convertToAssessmentItem($data);
         /** @var GapMatchInteraction $interaction */
