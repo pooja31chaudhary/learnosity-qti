@@ -130,11 +130,12 @@ class ConvertToQtiService
     */
     protected function decorateImsManifestRootElement(DOMElement $rootElement)
     {
-        $xsdLocation = 'http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd';
+        $xsdLocation = 'http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd';
         $xmlns = "http://www.imsglobal.org/xsd/imscp_v1p1";
         $rootElement->setAttribute('xmlns', $xmlns);
         $rootElement->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         $rootElement->setAttribute("xsi:schemaLocation", $xsdLocation);
+		
     }
 
     /**
@@ -178,34 +179,33 @@ class ConvertToQtiService
         return $this->convertAssessmentItem(json_decode(file_get_contents($file), true));
     }
 
-    // Traverse the -i option and find all paths with files
+    
+	// Traverse the -i option and find all paths with files
     private function parseInputFolders()
     {
         $folders = [];
         // Look for json files in the current path
         $finder = new Finder();
-        try {
-            $finder->files()->in($this->inputPath . '/activities');
+        $finder->files()->in($this->inputPath . '/activities');
+        if ($finder->count() > 0) {
             foreach ($finder as $json) {
                 $activityJson = json_decode(file_get_contents($json));
-                $itemReferences = $activityJson->data->items;
-                $this->itemReference = $itemReferences;
-                if (!empty($itemReferences)) {
-                    foreach ($itemReferences as $itemref) {
-                        $jsonfile = $this->inputPath . '/items/' . md5($itemref) . '.json';
-                        if (file_exists($jsonfile)) {
-                            $folders[] = $jsonfile;
-                        }
+                $this->itemReferences = $activityJson->data->items;
+                if (!empty($this->itemReferences)) {
+                    foreach ($this->itemReferences as $itemref) {
+                        $itemref = md5($itemref);
+                        $folders[] = $this->inputPath . '/items/' . $itemref . '.json';
                     }
                 } else {
                     $this->output->writeln("<error>Error converting : No item refrences found in the activity json</error>");
                 }
             }
-        } catch (Exception $exception) {
-            $message = $exception->getMessage();
-            throw new Exception($message);
+        } else {
+            $finder->files()->in($this->inputPath . '/items');
+            foreach ($finder as $json) {
+                $folders[] = $this->inputPath . '/items/' . $json->getRelativePathname();
+            }
         }
-
         return $folders;
     }
 

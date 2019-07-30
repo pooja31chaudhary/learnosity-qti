@@ -2,6 +2,7 @@
 
 namespace LearnosityQti\Tests\Integration\Processors\QtiV2\Out\QuestionTypes;
 
+use LearnosityQti\Processors\QtiV2\Out\Constants;
 use LearnosityQti\Utils\QtiMarshallerUtil;
 use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\InlineChoiceInteraction;
@@ -17,6 +18,50 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
         /** @var AssessmentItem $assessmentItem */
         $question = json_decode($this->getFixtureFileContents('learnosityjsons/data_clozedropdown.json'), true);
         $assessmentItemArray = $this->convertToAssessmentItem($question);
+        foreach ($assessmentItemArray as $assessmentItem) {
+            
+            $interactions = $assessmentItem->getComponentsByClassName('inlineChoiceInteraction', true)->getArrayCopy();
+            /** @var InlineChoiceInteraction $interactionOne */
+            $interactionOne = $interactions[0];
+            
+            $this->assertTrue($interactionOne instanceof InlineChoiceInteraction);
+            
+            $content = QtiMarshallerUtil::marshallCollection($assessmentItem->getItemBody()->getContent());
+            $this->assertNotEmpty($content);
+
+            // Assert response processing template
+            $this->assertEquals(Constants::RESPONSE_PROCESSING_TEMPLATE_MATCH_CORRECT, $assessmentItem->getResponseProcessing()->getTemplate());
+            
+            // Assert response declarations
+            $responseDeclarations = $assessmentItem->getResponseDeclarations()->getArrayCopy();
+            /** @var ResponseDeclaration $responseDeclarationOne */
+            $responseDeclarationOne = $responseDeclarations[0];
+            
+            // Check has the correct identifiers, also correct `correctResponse` values
+            $this->assertEquals($responseDeclarationOne->getIdentifier(), $interactionOne->getResponseIdentifier());
+            $this->assertNull($responseDeclarationOne->getMapping());
+            $this->assertEquals('INLINECHOICE_0', $responseDeclarationOne->getCorrectResponse()->getValues()->getArrayCopy()[0]->getValue());
+            $this->assertEquals('Vegetable', QtiMarshallerUtil::marshallCollection($interactionOne->getComponentByIdentifier('INLINECHOICE_0')->getComponents()));
+
+        }
+    }
+	
+	public function testWithDistractorRationale()
+    {
+        /** @var AssessmentItem $assessmentItem */
+        $question = json_decode($this->getFixtureFileContents('learnosityjsons/cloze_dropdown.json'), true);
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
+
+	    // Replace protected self reference with mock object
+        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
+	    $ref->setAccessible(true);
+	    $ref->setValue(null, $mock);
+            
+        $format = $mock->expects($this->once())
+				->method('getFormat')
+				->will($this->returnValue('qti'));
+		
+		$assessmentItemArray = $this->convertToAssessmentItem($question);
         foreach ($assessmentItemArray as $assessmentItem) {
             
             $interactions = $assessmentItem->getComponentsByClassName('inlineChoiceInteraction', true)->getArrayCopy();
@@ -71,7 +116,6 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
             // check assert for responseProcessing 
             $this->assertTrue($responseRuleOne instanceof ResponseCondition);
             $this->assertTrue($responseRuleTwo instanceof SetOutcomeValue);
-           
         }
     }
 }

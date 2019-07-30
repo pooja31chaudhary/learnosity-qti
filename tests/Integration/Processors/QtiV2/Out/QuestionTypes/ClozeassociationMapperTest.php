@@ -9,12 +9,12 @@ use qtism\common\enums\Cardinality;
 use qtism\data\AssessmentItem;
 use qtism\data\content\interactions\GapMatchInteraction;
 use qtism\data\content\interactions\GapText;
-use qtism\data\state\ResponseDeclaration;
-use qtism\data\state\Value;
-use qtism\data\rules\ResponseElse;
-use qtism\data\rules\ResponseIf;
 use qtism\data\content\ModalFeedbackCollection;
 use qtism\data\content\ModalFeedback;
+use qtism\data\rules\ResponseElse;
+use qtism\data\rules\ResponseIf;
+use qtism\data\state\ResponseDeclaration;
+use qtism\data\state\Value;
 use ReflectionProperty;
 
 class ClozeassociationMapperTest extends AbstractQuestionTypeTest

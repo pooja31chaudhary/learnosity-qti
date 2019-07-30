@@ -26,14 +26,7 @@
                     "penalty": 1,
                     "match_all_possible_responses": true
                 },
-                "max_length": 15,
-                "metadata": {
-                    "distractor_rationale": "Thanks for attending this test.",
-                    "distractor_rationale_response_level": [
-                        "Its correct",
-                        "its not correct"
-                    ]
-                }
+                "max_length": 15
             }
         }
     ],
