@@ -50,19 +50,9 @@ class ClozedropdownMapperTest extends AbstractQuestionTypeTest
     {
         /** @var AssessmentItem $assessmentItem */
         $question = json_decode($this->getFixtureFileContents('learnosityjsons/cloze_dropdown.json'), true);
-        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
-
-	    // Replace protected self reference with mock object
-        $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
-	    $ref->setAccessible(true);
-	    $ref->setValue(null, $mock);
-            
-        $format = $mock->expects($this->once())
-				->method('getFormat')
-				->will($this->returnValue('qti'));
-		
-		$assessmentItemArray = $this->convertToAssessmentItem($question);
-        foreach ($assessmentItemArray as $assessmentItem) {
+        $assessmentItemArray = $this->convertToAssessmentItem($question);
+        
+		foreach ($assessmentItemArray as $assessmentItem) {
             
             $interactions = $assessmentItem->getComponentsByClassName('inlineChoiceInteraction', true)->getArrayCopy();
             /** @var InlineChoiceInteraction $interactionOne */

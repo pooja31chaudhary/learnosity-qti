@@ -1,0 +1,50 @@
+{
+    "reference": "choice_matrix",
+    "content": "<div class=\"row\"><div class=\"col-xs-12\"><span class=\"learnosity-response question-fa7fad23-1a18-4b10-a1c8-3dafb1f46d9e\"></span></div></div>",
+    "workflow": null,
+    "metadata": {
+        "acknowledgements": null,
+        "scoring_type": "per-question"
+    },
+    "tags": {},
+    "questions": [
+        {
+            "reference": "fa7fad23-1a18-4b10-a1c8-3dafb1f46d9e",
+            "data": {
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "stems": [
+                    "[Stem 1]",
+                    "[Stem 2]",
+                    "[Stem 3]",
+                    "[Stem 4]"
+                ],
+                "stimulus": "<p>[This is the stem.]</p>",
+                "type": "choicematrix",
+                "validation": {
+                    "scoring_type": "exactMatch",
+                    "valid_response": {
+                        "score": 1,
+                        "value": [
+                            0,
+                            1,
+                            0,
+                            1
+                        ]
+                    }
+                },
+                "metadata": {
+                    "distractor_rationale": "General Feedback"
+                },
+                "ui_style": {
+                    "type": "table",
+                    "horizontal_lines": false
+                },
+                "shuffle_options": true
+            }
+        }
+    ],
+    "features": []
+}

@@ -6,7 +6,6 @@ use LearnosityQti\Entities\BaseQuestionType;
 use LearnosityQti\Entities\QuestionTypes\hotspot;
 use LearnosityQti\Entities\QuestionTypes\hotspot_image;
 use LearnosityQti\Processors\QtiV2\Out\Validation\HotspotValidationBuilder;
-use LearnosityQti\Utils\CurlUtil;
 use LearnosityQti\Utils\MimeUtil;
 use qtism\common\datatypes\QtiCoords;
 use qtism\common\datatypes\QtiShape;
@@ -69,7 +68,7 @@ class HotspotMapper extends AbstractQuestionTypeMapper
 
         $builder = new HotspotValidationBuilder($question->get_multiple_responses(), $valueIdentifierMap);
         list($responseDeclaration, $responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(), $feedbackOptions);
-
+        
         return [$interaction, $responseDeclaration, $responseProcessing];
     }
 

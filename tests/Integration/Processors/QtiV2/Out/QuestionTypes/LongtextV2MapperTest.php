@@ -44,20 +44,8 @@ class LongtextV2MapperTest extends AbstractQuestionTypeTest
             
             // Longtext shall have no <responseDeclaration> and <responseProcessing>
             $this->assertEquals(1, $assessmentItem->getResponseDeclarations()->count());
-            $this->assertNotNull($assessmentItem->getResponseProcessing());
+            $this->assertNull($assessmentItem->getResponseProcessing());
             
-            $this->assertCount(2,$assessmentItem->getResponseProcessing()->getComponents());
-            
-            $responseIf = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseIf', true)->getArrayCopy()[0];
-            $this->assertTrue($responseIf instanceof ResponseIf);
-            $promptIfString = QtiMarshallerUtil::marshallCollection($responseIf->getComponents());
-            $this->assertEquals('<isNull><variable identifier="RESPONSE"/></isNull><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue>', $promptIfString);
-
-            $responseElse = $assessmentItem->getResponseProcessing()->getComponentsByClassName('responseElse', true)->getArrayCopy()[0];
-            $this->assertTrue($responseElse instanceof ResponseElse);
-            $promptElseString = QtiMarshallerUtil::marshallCollection($responseElse->getComponents());
-            $this->assertEquals('<responseCondition><responseIf><match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match><setOutcomeValue identifier="SCORE"><variable identifier="MAXSCORE"/></setOutcomeValue></responseIf><responseElse><setOutcomeValue identifier="SCORE"><baseValue baseType="float">0</baseValue></setOutcomeValue></responseElse></responseCondition>', $promptElseString);
-        
             // Has <extendedTextInteraction> as the first and only interaction
             /** @var ExtendedTextInteraction $interaction */
             $interaction = $assessmentItem->getComponentsByClassName('extendedTextInteraction', true)->getArrayCopy()[0];

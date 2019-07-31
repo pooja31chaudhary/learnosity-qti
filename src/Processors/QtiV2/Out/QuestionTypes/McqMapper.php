@@ -107,11 +107,7 @@ class McqMapper extends AbstractQuestionTypeMapper
         }
 
         $builder = new McqValidationBuilder($question->get_multiple_responses(), $valueIdentifierMap);
-        if(isset($feedbackOptions) && !empty($feedbackOptions)){
-            list($responseDeclaration, $responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(),$feedbackOptions);
-        }else{
-            list($responseDeclaration, $responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(),[]);
-        }
+        list($responseDeclaration, $responseProcessing) = $builder->buildValidation($interactionIdentifier, $question->get_validation(), 1, $feedbackOptions);
         
         return [$interaction, $responseDeclaration, $responseProcessing];
     }

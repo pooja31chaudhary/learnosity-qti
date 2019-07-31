@@ -11,19 +11,24 @@ use ReflectionProperty;
 
 abstract class AbstractQuestionTypeTest extends AbstractTest {
    
-    protected function convertToAssessmentItem(array $data) {
-        $mock = $this->getMock('ConvertToQtiService', array('getFormat'));
-            
-	    // Replace protected self reference with mock object
+    protected function convertToAssessmentItem(array $data) 
+    {
+        $imagePath = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/world_map.png';
+        $mock = $this->getMock('ConvertToQtiService', array('getFormat','getInputPath'));
+        // Replace protected self reference with mock object
         $ref = new ReflectionProperty('LearnosityQti\Services\ConvertToQtiService', 'instance');
 	    $ref->setAccessible(true);
 	    $ref->setValue(null, $mock);
-            
-        $format = $mock->expects($this->once())
+
+        $format = $mock->expects($this->atLeastOnce())
 				->method('getFormat')
 				->will($this->returnValue('qti'));
-        
-        $content = $data['content'];
+		
+		$inputPath = $mock->expects($this->atLeastOnce())
+				->method('getInputPath')
+				->will($this->returnValue($imagePath));
+		
+		$content = $data['content'];
         $features = $data['features'];
         $assessmentItemArray = array();
         foreach ($data['questions'] as $question) {

@@ -56,7 +56,7 @@ class TokenhighlightMapperTest extends \PHPUnit_Framework_TestCase
         $mapper = new TokenhighlightMapper();
         /** @var HottextInteraction $interaction */
         list($interaction, $responseDeclaration, $responseProcessing) = $mapper->convert($question, 'testIdentifier', 'testIdentifierLabel');
-        //print_r($interaction); die;
+        
         $this->assertTrue($interaction instanceof HottextInteraction);
         $this->assertNotEmpty($responseDeclaration);
         $this->assertNotEmpty($responseProcessing);

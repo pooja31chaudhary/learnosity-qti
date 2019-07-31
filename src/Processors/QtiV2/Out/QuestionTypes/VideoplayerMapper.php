@@ -23,7 +23,7 @@ class VideoplayerMapper extends AbstractQuestionTypeMapper
         $interaction = new MediaInteraction($interactionIdentifier, true, $object);
         $interaction->setAutostart(true);
         $interaction->setMinPlays(1);
-        $interaction->setMaxPlays(1);
+        $interaction->setMaxPlays(5);
         $interaction->setLabel($interactionLabel);
 
         // Set loop

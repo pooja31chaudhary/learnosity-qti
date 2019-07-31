@@ -16,13 +16,13 @@ class AudioplayerMapper extends AbstractQuestionTypeMapper
         $question = $questionType;
         $questionData = $question->to_array();
         $src = $questionData['src'];
-
+        
         $object = new ObjectElement($src, MimeUtil::guessMimeType($src));
         // Build final interaction and its corresponding <responseDeclaration>, and its <responseProcessingTemplate>
         $interaction = new MediaInteraction($interactionIdentifier, true, $object);
         $interaction->setAutostart(true);
         $interaction->setMinPlays(1);
-        $interaction->setMaxPlays(1);
+        $interaction->setMaxPlays($questionData['playback_limit']);
         $interaction->setLabel($interactionLabel);
 
         // Set loop
