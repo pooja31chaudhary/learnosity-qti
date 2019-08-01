@@ -10,7 +10,7 @@ class VideoFeatureMapperTest extends \PHPUnit_Framework_TestCase {
 
     public function testSimpleCase()
     {
-        $src = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/ef04cc3_f589cd84-c67f-4d34-bc1e-2367c64a797e.mp3';
+        $src = realpath($_SERVER["DOCUMENT_ROOT"]).'/Fixtures/assets/8737759_58f8528b-6a01-4c87-bf59-a133e596fa9f.mp4';
 		$feature = new videoplayer('videoplayer', 'hosted-video', $src);
         
 		$videoPlayerMapper = new VideoplayerMapper();
