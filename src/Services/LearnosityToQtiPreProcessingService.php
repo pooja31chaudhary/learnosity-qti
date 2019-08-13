@@ -71,6 +71,7 @@ class LearnosityToQtiPreProcessingService
         } else {
             $nodeClassAttribute = $node->attr['class'];
             $featureReference = $this->getFeatureReferenceFromClassName($nodeClassAttribute);
+			 
             if (isset($this->widgets[$featureReference])) {
                 $feature = $this->widgets[$featureReference];
                 $type = isset($feature['data']['type']) ? $feature['data']['type'] : '';
@@ -92,7 +93,9 @@ class LearnosityToQtiPreProcessingService
                 $flowCollection->attach($object);
                 $div->setContent($flowCollection);
                 return QtiMarshallerUtil::marshallValidQti($div);
-            }
+            } else {
+				throw new MappingException($type . 'feature not supported');
+			}
         }
         throw new MappingException($type . ' not supported');
     }
